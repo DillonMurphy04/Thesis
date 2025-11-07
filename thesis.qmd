@@ -1,0 +1,86 @@
+---
+format:
+  pdf:
+    documentclass: report
+    papersize: letter
+    fontsize: 12pt
+    mainfont: Times New Roman
+    geometry:
+      - left=1.5in
+      - right=1in
+      - top=1in
+      - bottom=1in
+    include-before-body:
+      - frontmatter/information.tex
+      - frontmatter/title-page.tex
+      - frontmatter/copyright-page.tex
+      - frontmatter/committee-page.tex
+      - frontmatter/abstract.tex
+      - frontmatter/acknowledgments.tex
+      - frontmatter/table-of-contents.tex
+    number-sections: true
+    citation-style: apa
+    bibliography: bibliography/example-bibliography.bib
+    csl: bibliography/apa-6th-edition.csl
+    include-in-header: frontmatter/formating.tex
+---
+
+# Introduction
+
+# Background and Motivation
+
+## Uncertainty in Deep Learning
+
+## Deep Ensembles
+
+## Semantic Segmentation in Environmental Monitoring
+
+## Conformal Prediction Foundations
+
+## Adaptive or Shift-Aware CP
+
+# Methodology
+
+## Data
+
+## Model Training + Pipeline
+
+## Uncertainty Analysis
+
+## Conformalizing
+
+### Split CP for Classification
+
+### Variance-Aware Score Normalization
+
+**a) Parametric linear shrink**
+
+**b) Nonparametric normalization**
+
+## CP Evaluation
+
+Set Composition, Spatial Equality, and Conditional Coverage
+
+# Results
+
+## Ensemble Results
+
+## In-Distribution Evaluation
+
+## Temporal OOD (2022)
+
+global coverage and set composition
+
+## Class Conditional Coverage
+
+## Spatial Robustness within 2022
+
+## Sensitivity
+
+# Discussion
+
+# Limitations
+
+# Conclusion
+
+# Appendices

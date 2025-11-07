@@ -1,22 +1,16 @@
-\def\title{Thesis Title (use Title Case)}
-\def\author{Your Name}
-\def\degreemonth{June}
-\def\degreeyear{2025}
-\def\degree{Master of Science in Your Degree}
+\def\title{Adaptive Conformal Sets Under Distribution Shift: Using Ensemble Disagreement as an Epistemic Normalizer for Eelgrass Segmentation under Temporal Drift}
+\def\author{Dillon Murphy}
+\def\degreemonth{March}
+\def\degreeyear{2026}
+\def\degree{Master of Science in Statistics}
 \def\numberofmembers{3}
-   \def\chair{Misty Mustang, Ph.D. \linebreak Professor of Animal Science}
-   \def\othermemberA{Faculty Member, Ph.D. \linebreak Professor of Some Department}
-   \def\othermemberB{Another Faculty, Ph.D. \linebreak Professor of Some Department}
-   \def\othermemberC{Outside Advisor \linebreak CTO, External Organization Name}
-   \def\othermemberD{Awesome Lecturer, M.S. \linebreak Lecturer of Some Department}
-   \def\othermemberE{Faculty Member, VI, Ph.D. \linebreak Professor of Some Department}
-   \def\othermemberF{Faculty Member, VII, Ph.D. \linebreak Professor of Some Department}
-   \def\othermemberG{Faculty Member, VIII, Ph.D. \linebreak Professor of Some Department}
-   \def\othermemberH{Faculty Member, IX, Ph.D. \linebreak Professor of Some Department}
-\def\keywords{Select descriptive keywords and separate terms with a comma and a space.} % Make sure to end this in a . (i.e. Some, Thing, Interesting.)
+   \def\chair{Kelly Bodwin, Ph.D. \linebreak Associate Professor of Statistics and Data Science}
+   \def\othermemberA{Jonathon Ventura, Ph.D. \linebreak Associate Professor of Computer Science and Software Engineering}
+   \def\othermemberB{Andrew Fricker, Ph.D. \linebreak Associate Professor of Geography }
+\def\keywords{conformal prediction, adaptive sets, uncertainty, eelgrass, remote sensing.} % Make sure to end this in a . (i.e. Some, Thing, Interesting.)
 
 \def\abstract{%
-Write your abstract here
+Semantic segmentation of eelgrass (Zostera marina) from high-resolution drone-based imagery is essential for coastal habitat monitoring, restoration, and management, as these habitats see rapid changes due to climate change and human-induced influences. However, the reliability of generalizing these classification models not only relies on high-accuracy segmentation but also on rigorous uncertainty quantification that holds up when conditions change across years or locations. Conformal prediction (CP) converts a classifier's output into prediction sets with finite-sample marginal coverage; however, the standard score $s=1-p_y$ can under-cover in hard or out-of-distribution (OOD) regions under temporal drift. Inspired by heteroskedastic conformal regression, this study proposes normalizing conformal scores by an epistemic proxy, ensemble disagreement. These scores re-scale nonconformity by a data-driven estimation of local difficulty learned on the calibration set, so that the global quantile is conservative where OOD risk is high. This study evaluates (i) a parametric form $s'=(1-p_y)/(1+\lambda V)$, where V is ensemble variance of probabilities, and (ii) a nonparametric normalization $s'=s/\hat{\sigma}(V)$, where $\hat{\sigma}(V)=\text{E}[s|V]$ is estimated through quantile binning and interpolation. On drone imagery of the Morro Bay estuary, California (2018-2022), the models were trained on 2018-2021, calibrated on 2021, and evaluated on 2022 on OOD points. Normalized scores recover much of the lost coverage seen by vanilla split conformal prediction and approximate target, increased the percentage of singletons, and reduced the spatial coverage variability. The study provides a simple-to-implement drop-in framework to regain coverage in difficult regions and out-of-distribution data without retraining or labels at test time.
 }
 
 \def\tocpagelegnth{1} % Number of pages your Table of Contents is (used to set correct page numbers for List of Tables and List of Figures)
