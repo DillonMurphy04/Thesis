@@ -1,8 +1,84 @@
-@book{r_core_team_r_2024,
-	address = {Vienna, Austria},
-	title = {R: {A} {Language} and {Environment} for {Statistical} {Computing}},
-	url = {https://www.R-project.org/},
-	publisher = {R Foundation for Statistical Computing},
-	author = {{R Core Team}},
-	year = {2024},
+@Article{tallam2023,
+AUTHOR = {Tallam, Krti and Nguyen, Nam and Ventura, Jonathan and Fricker, Andrew and Calhoun, Sadie and O’Leary, Jennifer and Fitzgibbons, Mauriça and Robbins, Ian and Walter, Ryan K.},
+TITLE = {Application of Deep Learning for Classification of Intertidal Eelgrass from Drone-Acquired Imagery},
+JOURNAL = {Remote Sensing},
+VOLUME = {15},
+YEAR = {2023},
+NUMBER = {9},
+ARTICLE-NUMBER = {2321},
+URL = {https://www.mdpi.com/2072-4292/15/9/2321},
+ISSN = {2072-4292},
+ABSTRACT = {Shallow estuarine habitats are globally undergoing rapid changes due to climate change and anthropogenic influences, resulting in spatiotemporal shifts in distribution and habitat extent. Yet, scientists and managers do not always have rapidly available data to track habitat changes in real-time. In this study, we apply a novel and a state-of-the-art image segmentation machine learning technique (DeepLab) to two years of high-resolution drone-based imagery of a marine flowering plant species (eelgrass, a temperate seagrass). We apply the model to eelgrass (Zostera marina) meadows in the Morro Bay estuary, California, an estuary that has undergone large eelgrass declines and the subsequent recovery of seagrass meadows in the last decade. The model accurately classified eelgrass across a range of conditions and sizes from meadow-scale to small-scale patches that are less than a meter in size. The model recall, precision, and F1 scores were 0.954, 0.723, and 0.809, respectively, when using human-annotated training data and random assessment points. All our accuracy values were comparable to or demonstrated greater accuracy than other models for similar seagrass systems. This study demonstrates the potential for advanced image segmentation machine learning methods to accurately support the active monitoring and analysis of seagrass dynamics from drone-based images, a framework likely applicable to similar marine ecosystems globally, and one that can provide quantitative and accurate data for long-term management strategies that seek to protect these vital ecosystems.},
+DOI = {10.3390/rs15092321}
 }
+
+@misc{angelopoulos2021,
+      title={A Gentle Introduction to Conformal Prediction and Distribution-Free Uncertainty Quantification}, 
+      author={Anastasios N. Angelopoulos and Stephen Bates},
+      year={2022},
+      eprint={2107.07511},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2107.07511}, 
+}
+
+@article{dewolf2025,
+	title = {Conditional validity of heteroskedastic conformal regression},
+	volume = {14},
+	issn = {2049-8772},
+	url = {https://doi.org/10.1093/imaiai/iaaf013},
+	doi = {10.1093/imaiai/iaaf013},
+	abstract = {Conformal prediction, and split conformal prediction as a specific implementation, offers a distribution-free approach to estimating prediction intervals with statistical guarantees. Recent work has shown that split conformal prediction can produce state-of-the-art prediction intervals when focusing on marginal coverage, i.e. on a calibration dataset, the method produces on average prediction intervals that contain the ground truth with a predefined coverage level. However, such intervals are often not adaptive, which can be problematic for regression problems with heteroskedastic noise. This paper tries to shed new light on how prediction intervals can be constructed, using methods such as normalized and Mondrian conformal prediction, in such a way that they adapt to the heteroskedasticity of the underlying process. Theoretical and experimental results are presented, in which these methods are compared in a systematic way. In particular, it is shown how the conditional validity of a chosen conformal predictor can be related to (implicit) assumptions about the data-generating distribution.},
+	number = {2},
+	journal = {Information and Inference: A Journal of the IMA},
+	author = {Dewolf, Nicolas and De Baets, Bernard and Waegeman, Willem},
+	month = may,
+	year = {2025},
+	note = {\_eprint: https://academic.oup.com/imaiai/article-pdf/14/2/iaaf013/63165177/iaaf013.pdf},
+	pages = {iaaf013},
+}
+
+@inproceedings{lakshminarayanan2017,
+author = {Lakshminarayanan, Balaji and Pritzel, Alexander and Blundell, Charles},
+title = {Simple and scalable predictive uncertainty estimation using deep ensembles},
+year = {2017},
+isbn = {9781510860964},
+publisher = {Curran Associates Inc.},
+address = {Red Hook, NY, USA},
+abstract = {Deep neural networks (NNs) are powerful black box predictors that have recently achieved impressive performance on a wide spectrum of tasks. Quantifying predictive uncertainty in NNs is a challenging and yet unsolved problem. Bayesian NNs, which learn a distribution over weights, are currently the state-of-the-art for estimating predictive uncertainty; however these require significant modifications to the training procedure and are computationally expensive compared to standard (non-Bayesian) NNs. We propose an alternative to Bayesian NNs that is simple to implement, readily parallelizable, requires very little hyperparameter tuning, and yields high quality predictive uncertainty estimates. Through a series of experiments on classification and regression benchmarks, we demonstrate that our method produces well-calibrated uncertainty estimates which are as good or better than approximate Bayesian NNs. To assess robustness to dataset shift, we evaluate the predictive uncertainty on test examples from known and unknown distributions, and show that our method is able to express higher uncertainty on out-of-distribution examples. We demonstrate the scalability of our method by evaluating predictive uncertainty estimates on ImageNet.},
+booktitle = {Proceedings of the 31st International Conference on Neural Information Processing Systems},
+pages = {6405–6416},
+numpages = {12},
+location = {Long Beach, California, USA},
+series = {NIPS'17}
+}
+
+@inproceedings{kendall2017,
+ author = {Kendall, Alex and Gal, Yarin},
+ booktitle = {Advances in Neural Information Processing Systems},
+ editor = {I. Guyon and U. Von Luxburg and S. Bengio and H. Wallach and R. Fergus and S. Vishwanathan and R. Garnett},
+ pages = {},
+ publisher = {Curran Associates, Inc.},
+ title = {What Uncertainties Do We Need in Bayesian Deep Learning for Computer Vision?},
+ url = {https://proceedings.neurips.cc/paper_files/paper/2017/file/2650d6089a6d640c5e85b2b88265dc2b-Paper.pdf},
+ volume = {30},
+ year = {2017}
+}
+
+
+@InProceedings{guo2017,
+  title = 	 {On Calibration of Modern Neural Networks},
+  author =       {Chuan Guo and Geoff Pleiss and Yu Sun and Kilian Q. Weinberger},
+  booktitle = 	 {Proceedings of the 34th International Conference on Machine Learning},
+  pages = 	 {1321--1330},
+  year = 	 {2017},
+  editor = 	 {Precup, Doina and Teh, Yee Whye},
+  volume = 	 {70},
+  series = 	 {Proceedings of Machine Learning Research},
+  month = 	 {06--11 Aug},
+  publisher =    {PMLR},
+  pdf = 	 {http://proceedings.mlr.press/v70/guo17a/guo17a.pdf},
+  url = 	 {https://proceedings.mlr.press/v70/guo17a.html},
+  abstract = 	 {Confidence calibration – the problem of predicting probability estimates representative of the true correctness likelihood – is important for classification models in many applications. We discover that modern neural networks, unlike those from a decade ago, are poorly calibrated. Through extensive experiments, we observe that depth, width, weight decay, and Batch Normalization are important factors influencing calibration. We evaluate the performance of various post-processing calibration methods on state-of-the-art architectures with image and document classification datasets. Our analysis and experiments not only offer insights into neural network learning, but also provide a simple and straightforward recipe for practical settings: on most datasets, temperature scaling – a single-parameter variant of Platt Scaling – is surprisingly effective at calibrating predictions.}
+}
+

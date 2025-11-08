@@ -27,9 +27,23 @@ format:
 
 # Introduction
 
+Eelgrass (*Zostera marina*) is a seagrass species of temperate waters that provides an anchor to coastal ecosystems by providing sediment stabilization, carbon sequestration, eliminating contamination, and providing habitats for protected species. Warming oceans, storm regimes, and local disturbance have quickly reshaped the intertidal morphology and habitat extent. As these threats increase, there is a need to monitor changes to determine appropriate environmental management. In recent years, deep networks have made this intertidal mapping practical in complex imagery, achieving strong pixel-wise accuracy in areas such as Morro Bay, California [@tallam2023]. However, the reliability of general utilization of these classification models not only relies on high-accuracy segmentation, but also on rigorous uncertainty quantification under temporal and spatial distribution shift. Imagery collected over different years, at different tides or seasons, can erode the model's calibration, causing it to be over-confident. This study builds off these models to create a post hoc uncertainty framework.
+
+Uncertainty quantification is a requirement for flagging ambiguous areas. To answer this, split conformal prediction provides an appealing framework. It offers a wrapping of any probabilistic predictor to produce prediction sets with finite-sample marginal coverage under exchangeability, simply by using a calibration set and a quantile nonconformity score [@angelopoulos2021]. In classification, a natural choice of noncormity score is $s=1-p_y$, yielding a prediction set of all labels whose scores do not exceed a global threshold learned on calibration. With stable data, this can be simple and effective; however, in reality, the distribution of scores can differ by difficulty. A threshold calibrated over one year can underperform when a distributional shift occurs, such as temporal drift.
+
+To remedy this, it is necessary to make the conformal prediction adaptive to drift or local difficulty. First, work in adaptive or locally weighted CP in regression has shown that normalizing scores by a measure of local difficulty can make a single global quantile more appropriate across heterogeneous inputs, which improves approximate conditional behavior [@dewolf2025]. Second, research on uncertainty in deep learning has demonstrated that diversified deep ensembles provide practical, shift-aware signals of difficulty that tend to grow on out-of-distribution inputs [@lakshminarayanan2017]. Using these ideas, this study implements a simple strategy for rescaling the classification score by a calibration-learned difficulty proxy, so that the global threshold becomes conservative under drift, without the need for recalibration or labels.
+
+This thesis develops this design for eelgrass segmentation of multi-year drone imagery. The proposed normalizers are deliberately simple to adopt into existing pipelines. This includes: 1. a linear normalization $s'=(1-p_y)/(1+\lambda V)$ where $V$ summarizes ensemble disagreement and $\lambda$ controls degree of conservativeness and 2. a learned normalizer $s'=s/\hat{\sigma}(V)$ where $\hat{\sigma}(V)=\text{E}[s|V]$ is estimated on the calibration split via quantile binning and interpolation. Both approaches retain standard CP workflow and require no labels at test time or retraining.
+
 # Background and Motivation
 
+Effective eelgrass monitoring requires models that both provide accurate predictions, as well as how certain they are for those predictions. This section reviews the uncertainty concepts used in deep learning.
+
 ## Uncertainty in Deep Learning
+
+Uncertainty in predictive modeling is commonly broken up into two components: *epistemic* and *aleotoric*. These two components collectively comprise the total uncertainty in a model's predictions. Aleatoric uncertainty represents the noise inherent in observations, which is often impossible to remove, even with the addition of more data (e.g. sensor noise or true label ambiguity). Even a perfect model cannot remove it. Epistemic uncertainty represents the uncertainty of the model itself, which can be reduced with additional or higher-quality data [@kendall2017]. 
+
+For modern vision models, raw softmax probabilities are often miscalibrated, meaning the outputted confidence does not match empirical accuracy. This can be especially prevalent under shift, where models can be confident yet wrong. Post-hoc calibration, such as temperature scaling, rescales logits via $softmax(z/T)$ and improves in-distribution calibration without changing accuracy [@guo2017]. Under shift, however, calibration is not enough, as the structure of the errors can change. Thus, it requires an uncertainty representation that integrates decision rules that signal the difficulty of the prediction.
 
 ## Deep Ensembles
 
@@ -37,7 +51,7 @@ format:
 
 ## Conformal Prediction Foundations
 
-## Adaptive or Shift-Aware CP
+## Adaptive or Sh ift-Aware CP
 
 # Methodology
 
@@ -83,4 +97,28 @@ global coverage and set composition
 
 # Conclusion
 
-# Appendices
+## Computational Details
+
+# REFERENCES {.unnumbered}
+
+::: {#refs}
+:::
+
+\appendix
+
+<!-- Store original definitions formatting -->
+
+\let\oldclearpage\clearpage
+\let\oldcleardoublepage\cleardoublepage
+
+<!-- Disable page breaks -->
+
+\let\clearpage\relax
+\let\cleardoublepage\relax
+
+# Super Cool Fancy Function
+
+<!-- Restore original formatting -->
+
+\let\clearpage\oldclearpage
+\let\cleardoublepage\oldcleardoublepage
