@@ -82,3 +82,48 @@ series = {NIPS'17}
   abstract = 	 {Confidence calibration – the problem of predicting probability estimates representative of the true correctness likelihood – is important for classification models in many applications. We discover that modern neural networks, unlike those from a decade ago, are poorly calibrated. Through extensive experiments, we observe that depth, width, weight decay, and Batch Normalization are important factors influencing calibration. We evaluate the performance of various post-processing calibration methods on state-of-the-art architectures with image and document classification datasets. Our analysis and experiments not only offer insights into neural network learning, but also provide a simple and straightforward recipe for practical settings: on most datasets, temperature scaling – a single-parameter variant of Platt Scaling – is surprisingly effective at calibrating predictions.}
 }
 
+@inbook{ovadia2019,
+author = {Ovadia, Yaniv and Fertig, Emily and Ren, Jie and Nado, Zachary and Sculley, D. and Nowozin, Sebastian and Dillon, Joshua V. and Lakshminarayanan, Balaji and Snoek, Jasper},
+title = {Can you trust your model's uncertainty? evaluating predictive uncertainty under dataset shift},
+year = {2019},
+publisher = {Curran Associates Inc.},
+address = {Red Hook, NY, USA},
+abstract = {Modern machine learning methods including deep learning have achieved great success in predictive accuracy for supervised learning tasks, but may still fall short in giving useful estimates of their predictive uncertainty. Quantifying uncertainty is especially critical in real-world settings, which often involve input distributions that are shifted from the training distribution due to a variety of factors including sample bias and non-stationarity. In such settings, well calibrated uncertainty estimates convey information about when a model's output should (or should not) be trusted. Many probabilistic deep learning methods, including Bayesian-and non-Bayesian methods, have been proposed in the literature for quantifying predictive uncertainty, but to our knowledge there has not previously been a rigorous large-scale empirical comparison of these methods under dataset shift. We present a large-scale benchmark of existing state-of-the-art methods on classification problems and investigate the effect of dataset shift on accuracy and calibration. We find that traditional post-hoc calibration does indeed fall short, as do several other previous methods. However, some methods that marginalize over models give surprisingly strong results across a broad spectrum of tasks.},
+booktitle = {Proceedings of the 33rd International Conference on Neural Information Processing Systems},
+articleno = {1254},
+numpages = {12}
+}
+
+@article{lei2018,
+author = {Jing Lei and Max G’Sell and Alessandro Rinaldo and Ryan J. Tibshirani and Larry Wasserman},
+title = {Distribution-Free Predictive Inference for Regression},
+journal = {Journal of the American Statistical Association},
+volume = {113},
+number = {523},
+pages = {1094--1111},
+year = {2018},
+publisher = {ASA Website},
+doi = {10.1080/01621459.2017.1307116},
+URL = { 
+        https://doi.org/10.1080/01621459.2017.1307116
+},
+eprint = { 
+        https://doi.org/10.1080/01621459.2017.1307116
+}
+}
+
+@article{
+chernozhukov2021,
+author = {Victor Chernozhukov  and Kaspar Wüthrich  and Yinchu Zhu },
+title = {Distributional conformal prediction},
+journal = {Proceedings of the National Academy of Sciences},
+volume = {118},
+number = {48},
+pages = {e2107794118},
+year = {2021},
+doi = {10.1073/pnas.2107794118},
+URL = {https://www.pnas.org/doi/abs/10.1073/pnas.2107794118},
+eprint = {https://www.pnas.org/doi/pdf/10.1073/pnas.2107794118},
+abstract = {Prediction problems are important in many contexts. Examples include cross-sectional prediction, time series forecasting, counterfactual prediction and synthetic controls, and individual treatment effect prediction. We develop a prediction method that works in conjunction with many powerful classical methods (e.g., conventional quantile regression) as well as modern high-dimensional methods for estimating conditional distributions (e.g., quantile neural networks). Unlike many existing prediction approaches, our method is valid conditional on the observed predictors and efficient under some conditions. Importantly, our method is also robust; it exhibits unconditional coverage guarantees under model misspecification, under overfitting, and with time series data. We propose a robust method for constructing conditionally valid prediction intervals based on models for conditional distributions such as quantile and distribution regression. Our approach can be applied to important prediction problems, including cross-sectional prediction, k–step-ahead forecasts, synthetic controls and counterfactual prediction, and individual treatment effects prediction. Our method exploits the probability integral transform and relies on permuting estimated ranks. Unlike regression residuals, ranks are independent of the predictors, allowing us to construct conditionally valid prediction intervals under heteroskedasticity. We establish approximate conditional validity under consistent estimation and provide approximate unconditional validity under model misspecification, under overfitting, and with time series data. We also propose a simple “shape” adjustment of our baseline method that yields optimal prediction intervals.}}
+
+
