@@ -51,38 +51,49 @@ Deep ensembles can address uncertainty by aggregating predictions from models tr
 
 ## Semantic Segmentation in Environmental Monitoring
 
-Semantic image segmentation is a deep learning neural network technique that assigns class labels to each pixel within an image, delineating objects. Recent work demonstrates that deep networks can accurately classify intertidal eelgrass from drone imagery at useful resolutions [@tallam2023]. Environmental monitoring can pose unique challenges, as not only are annotations costly and sometimes ambiguous, but the habitat is constantly shifting over seasonal and annual time scales. Even at the same site, small variations such as time of day, tidal height, etc, can alter the conditions of the imagery. 
+Semantic image segmentation is a deep learning neural network technique that assigns class labels to each pixel within an image, delineating objects. Recent work demonstrates that deep networks can accurately classify intertidal eelgrass from drone imagery at useful resolutions [@tallam2023]. Environmental monitoring can pose unique challenges, as not only are annotations costly and sometimes ambiguous, but the habitat is constantly shifting over seasonal and annual time scales. Even at the same site, small variations such as time of day, tidal height, etc, can alter the conditions of the imagery.
 
 ## Conformal Prediction Foundations
 
-Conformal prediction provides a model and distribution-free technique to convert probability scores into prediction sets with finite-sample marginal coverage under exchangeability  [@angelopoulos2021]. For a classifier with probabilities $p(x)$, a simple *nonconformity score* is $s=1-p_y$, which is small when the model is confident in the true class. In split conformal prediction, scores are computed on a calibration set $C$ of size $n$ and the finite-sample-corrected quantile is selected $\hat{q}_\alpha = \operatorname{Quantile}_{\lceil (n + 1)(1 - \alpha) \rceil / n}(\{s_i\})$, then the set value prediction is outputed $$C_\alpha(x)=\{y:s\leq\hat{q}_\alpha\}$$
-This procedure guarantees $P\{Y∈C_\alpha(X)\}\geq1-\alpha$ for new points exchangeable with $C$, regardless of the underlying model. Two limitations of conformal prediction motivate this thesis. The first limitation is that the guarantee is marginal. This means there is no guarantee of conditional coverage, that the per class coverage will be $\geq$ target, and that coverage is not guaranteed across differing inputs, such as varying difficulty. Second, conformal prediction has mathematical validity due to the concept of symmetry (data could have been seen in any order) as long as the data is exchangeable. Coverage guarantees are lost as distribution drifts, and the model can become overly confident, leading to under-coverage. To address these problems, we need to use an adaptive variant of conformal prediction, which is more conservative for harder inputs.
+Conformal prediction provides a model and distribution-free technique to convert probability scores into prediction sets with finite-sample marginal coverage under exchangeability [@angelopoulos2021]. For a classifier with probabilities $p(x)$, a simple *nonconformity score* is $s=1-p_y$, which is small when the model is confident in the true class. In split conformal prediction, scores are computed on a calibration set $C$ of size $n$ and the finite-sample-corrected quantile is selected $\hat{q}_\alpha = \operatorname{Quantile}_{\lceil (n + 1)(1 - \alpha) \rceil / n}(\{s_i\})$, then the set value prediction is outputed $$C_\alpha(x)=\{y:s\leq\hat{q}_\alpha\}$$ This procedure guarantees $P\{Y∈C_\alpha(X)\}\geq1-\alpha$ for new points exchangeable with $C$, regardless of the underlying model. Two limitations of conformal prediction motivate this thesis. The first limitation is that the guarantee is marginal. This means there is no guarantee of conditional coverage, that the per class coverage will be $\geq$ target, and that coverage is not guaranteed across differing inputs, such as varying difficulty. Second, conformal prediction has mathematical validity due to the concept of symmetry (data could have been seen in any order) as long as the data is exchangeable. Coverage guarantees are lost as distribution drifts, and the model can become overly confident, leading to under-coverage. To address these problems, we need to use an adaptive variant of conformal prediction, which is more conservative for harder inputs.
 
 ## Adaptive or Shift-Aware CP
 
-There is a substantial amount of literature that aims to make CP adaptive to heterogeneity or robust during dataset drift. 
+There is a substantial amount of literature that aims to make CP adaptive to heterogeneity or robust during dataset drift.
 
-In regression, locally-weighted CP normalizes residuals by an estimate of local spread to equalize scores for a global quantile under heterogeneity [@lei2018]. Distributional conformal prediction (DCP) transforms the score using an estimate of the conditional cumulative distribution function. If the distribution of the score is stable conditional on covariates, then a single global quantile should be appropriate across those covariates [@chernozhukov2021]. 
+In regression, locally-weighted CP normalizes residuals by an estimate of local spread to equalize scores for a global quantile under heterogeneity [@lei2018]. Distributional conformal prediction (DCP) transforms the score using an estimate of the conditional cumulative distribution function. If the distribution of the score is stable conditional on covariates, then a single global quantile should be appropriate across those covariates [@chernozhukov2021].
 
-The two ideas loosely connect to this variance score normalization. Let $S=s(X,Y)$ denote the standard noncomformity score and let $V=V(X)$ be a one-dimensional proxy from the deep ensemble (member-probability variance after temperature scaling). We can use this proxy to stabilize the score with respect to $V$, rather than estimating an ultra-high-dimensional $F_{S|X}$ as in DCP. Additionally, we do not estimate a full conditional CDF transform and instead normalize under a multiplicative difficulty assumption $$S=a(V)U,\quad a(V)>0,\quad U \perp \!\!\! \perp V.$$ Then, $S'=S/a(V)\approx U$, so $S'|V$ becomes approximately invariant, and locally tuned to difficulty. Normalization targets the actual failure under shift, that the global threshold will become too lenient for the hard OOD inputs. On the calibration set, we estimate $\hat{a} \approx E[S|V=v]$ via quantile binning and smooth interpolation, and then conformalize the normalized score $S’=S/\hat{a}(V)$. Thus, if the conditional distribution $S|V=v$ is roughly the same across years: $$S∣V=v (calibration)\approx S∣V=v (test),$$ then we expect the normalized scores to be approximately stable conditional on $V$. Then the global quantile will be appropriate across the shifted years. Intuitively, pixels with large member disagreements (hard pixels) would have larger scores. Dividing by $\hat{a}(V)$ will equalize the scores, so that hard and easy pixels are all scored equally, being precise on easy inputs and conservative on difficult ones. By using a difficulty signal (epistemic uncertainty) that is specifically “shift-aware,” we expect that the score becomes shift-aware as well. 
+The two ideas loosely connect to this variance score normalization. Let $S=s(X,Y)$ denote the standard noncomformity score and let $V=V(X)$ be a one-dimensional proxy from the deep ensemble (member-probability variance after temperature scaling). We can use this proxy to stabilize the score with respect to $V$, rather than estimating an ultra-high-dimensional $F_{S|X}$ as in DCP. Additionally, we do not estimate a full conditional CDF transform and instead normalize under a multiplicative difficulty assumption $$S=a(V)U,\quad a(V)>0,\quad U \perp \!\!\! \perp V.$$ Then, $S'=S/a(V)\approx U$, so $S'|V$ becomes approximately invariant, and locally tuned to difficulty. Normalization targets the actual failure under shift, that the global threshold will become too lenient for the hard OOD inputs. On the calibration set, we estimate $\hat{a} \approx E[S|V=v]$ via quantile binning and smooth interpolation, and then conformalize the normalized score $S’=S/\hat{a}(V)$. Thus, if the conditional distribution $S|V=v$ is roughly the same across years: $$S∣V=v (calibration)\approx S∣V=v (test),$$ then we expect the normalized scores to be approximately stable conditional on $V$. Then the global quantile will be appropriate across the shifted years. Intuitively, pixels with large member disagreements (hard pixels) would have larger scores. Dividing by $\hat{a}(V)$ will equalize the scores, so that hard and easy pixels are all scored equally, being precise on easy inputs and conservative on difficult ones. By using a difficulty signal (epistemic uncertainty) that is specifically “shift-aware,” we expect that the score becomes shift-aware as well.
 
 # Methodology
 
 ## Data
 
+This study uses imagery of the estuary in Morro Bay, California. The data was collected between 2018 and 2022. Eelgrass was mapped using a DJI Phantom 4 Pro drone with a high-resolution camera. Data was collected between the months of November and January (of the following year) during days of extreme low tides, when eelgrass is exposed. Flight times were approximately 1 hour due to limitations of tide duration. High-resolution estuary-wide orthomosaics were acquired (~5000 images per year) and manually annotated to delineate between eelgrass and non-eelgrass polygons by a team of GIS specialists, as mentioned in @tallam2023. This includes iterative validation checks, resulting in ~1000 hours spent per year. The resulting polygons were rasterized to match imagery, resulting in pixel-wise labels for semantic segmentation.
+
+For model development, imagery from 2018-2021 is treated as in-distribution (ID), while imagery from 2022 is treated as temporally out-of-distribution (OOD).  For 2022, instead of fully labeling the orthomosaic (which, as mentioned, can be very expensive), a set of 1000 randomly sampled points was labeled as either eelgrass or non-eelgrass. The 2018-2021 data was tiled into chips of size 448x448 pixels and a stride of 224 pixels, resulting in 50% overlap between chips.
+
+::: {#fig-chip-example layout-ncol="2" fig-pos="H"}
+![Original image chip](images/clipboard-272086378.png){fig-alt="Original drone tile of Morro Bay estuary"}
+
+![Corresponding eelgrass segmentation label](images/clipboard-3161351765.png){fig-alt="Manual annotation raster label"}
+
+Example 448×448 px tile from the drone orthomosaic (left) and the corresponding manually digitized eelgrass label (right).
+:::
+
+2021 was chosen as the *calibration year* as it is the most recent pre-2022 year. For 2021, the data was partitioned into four subsets: 1. a train subset (together with 2018-2020), 2. a small temperature-scaling subset to estimate the models' over- or underconfidence in their softmax probabilities, 3. a CP calibration subset to compute conformal scores and quantiles, and 4. an evaluation subset to test in-distribution coverage. The OOD 2022 evaluation set is thus never used in training, temperature scaling, or conformal calibration.
+
 ## Model Training + Pipeline
 
 ## Uncertainty Analysis
 
-## Conformalizing
+## Split CP for Classification
 
-### Split CP for Classification
+## Variance-Aware Score Normalization
 
-### Variance-Aware Score Normalization
+### Parametric linear shrink
 
-#### Parametric linear shrink
-
-#### Nonparametric normalization
+### Nonparametric normalization
 
 ## CP Evaluation
 
