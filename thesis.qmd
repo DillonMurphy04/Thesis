@@ -69,21 +69,51 @@ The two ideas loosely connect to this variance score normalization. Let $S=s(X,Y
 
 ## Data
 
-This study uses imagery of the estuary in Morro Bay, California. The data was collected between 2018 and 2022. Eelgrass was mapped using a DJI Phantom 4 Pro drone with a high-resolution camera. Data was collected between the months of November and January (of the following year) during days of extreme low tides, when eelgrass is exposed. Flight times were approximately 1 hour due to limitations of tide duration. High-resolution estuary-wide orthomosaics were acquired (~5000 images per year) and manually annotated to delineate between eelgrass and non-eelgrass polygons by a team of GIS specialists, as mentioned in @tallam2023. This includes iterative validation checks, resulting in ~1000 hours spent per year. The resulting polygons were rasterized to match imagery, resulting in pixel-wise labels for semantic segmentation.
+This study uses imagery of the estuary in Morro Bay, California. The data was collected between 2018 and 2022. Eelgrass was mapped using a DJI Phantom 4 Pro drone with a high-resolution camera. Data was collected between the months of November and January (of the following year) during days of extreme low tides, when eelgrass is exposed. Flight times were approximately 1 hour due to limitations of tide duration. High-resolution estuary-wide orthomosaics were acquired (\~5000 images per year) and manually annotated to delineate between eelgrass and non-eelgrass polygons by a team of GIS specialists, as mentioned in @tallam2023. This includes iterative validation checks, resulting in \~1000 hours spent per year. The resulting polygons were rasterized to match imagery, resulting in pixel-wise labels for semantic segmentation.
 
-For model development, imagery from 2018-2021 is treated as in-distribution (ID), while imagery from 2022 is treated as temporally out-of-distribution (OOD).  For 2022, instead of fully labeling the orthomosaic (which, as mentioned, can be very expensive), a set of 1000 randomly sampled points was labeled as either eelgrass or non-eelgrass. The 2018-2021 data was tiled into chips of size 448x448 pixels and a stride of 224 pixels, resulting in 50% overlap between chips.
+For model development, imagery from 2018-2021 is treated as in-distribution (ID), while imagery from 2022 is treated as temporally out-of-distribution (OOD). For 2022, instead of fully labeling the orthomosaic (which, as mentioned, can be very expensive), a set of 1000 randomly sampled points was labeled as either eelgrass or non-eelgrass. The 2018-2021 data was tiled into chips of size 448x448 pixels and a stride of 224 pixels, resulting in 50% overlap between chips.
 
 ::: {#fig-chip-example layout-ncol="2" fig-pos="H"}
 ![Original image chip](images/clipboard-272086378.png){fig-alt="Original drone tile of Morro Bay estuary"}
 
 ![Corresponding eelgrass segmentation label](images/clipboard-3161351765.png){fig-alt="Manual annotation raster label"}
 
-Example 448×448 px tile from the drone orthomosaic (left) and the corresponding manually digitized eelgrass label (right).
+Example 448×448 px tile from the drone orthomosaic and corresponding manually digitized eelgrass label.
 :::
 
 2021 was chosen as the *calibration year* as it is the most recent pre-2022 year. For 2021, the data was partitioned into four subsets: 1. a train subset (together with 2018-2020), 2. a small temperature-scaling subset to estimate the models' over- or underconfidence in their softmax probabilities, 3. a CP calibration subset to compute conformal scores and quantiles, and 4. an evaluation subset to test in-distribution coverage. The OOD 2022 evaluation set is thus never used in training, temperature scaling, or conformal calibration.
 
-## Model Training + Pipeline
+## Model Training and Inference Pipeline
+
+### Segmentation Ensemble
+
+To obtain the epistemic uncertainty proxy and achieve high-accuracy predictions, we trained a heterogeneous deep ensemble of semantic segmentation models to increase model diversity. In total $K=6$ models were added to the ensemble. Of the 6, 2 of each model architecture were chosen. These architectures include DeepLabv3+, UNet, and two variants of Segment Anything Model (SAM) that were fine-tuned with low-rank adapters (Sam-LoRA). Each model type had one multi-year (2018-202) model in the ensemble and a single-year (2021 only) model. Training was performed using dual NVIDIA RTX 3090 (24 GB VRAM) GPUs, and took approximately one week for 4-year models and three days for single-year models.
+
+The models were trained using the ArcGIS Learn Python module. For the two DeepLabV3+ models, we used a ResNet-101 backbone pre-trained on ImageNet, whereas the U-Net models, by default, use a ResNet-34 encoder. SAM-LoRA uses a pre-trained SAM encoder (vision transformer-based model) and inserts low-rank adapter layers to adapt the model for eelgrass segmentation, without fully tuning the model.
+
+::: {#fig-architectures layout-ncol="2" fig-pos="H"}
+![SAM-LoRA architecture](images/clipboard-980354345.png){fig-alt="Diagram of the SAM-LoRA segmentation model architecture used in this study, adapted from ArcGIS Learn documentation."}
+
+![U-Net architecture](images/clipboard-1951495164.png){fig-alt="Diagram of the U-Net architecture with encoder–decoder skip connections, adapted from ArcGIS Learn documentation."}
+
+![DeepLabv3+ architecture](images/clipboard-1091068349.png){fig-alt="Diagram of the DeepLabv3+ architecture with atrous spatial pyramid pooling, adapted from ArcGIS Learn documentation."}
+
+Model architectures included in the ensemble. Images from the ArcGIS Learn developer guides.
+:::
+
+Models were trained for 20 epochs, and using a held-out validation set, the best checkpoint (best validation loss) was selected to be included in the ensemble.
+
+::: {#fig-loss layout-ncol="1" fig-pos="H"}
+![](images/clipboard-1054493005.png)
+
+Example training and validation loss curve for DeepLabV3 4 year model
+:::
+
+### Probability Calibration and Aggregation
+
+At inference time, each of the models produces per-pixel logits, which are then temperature-scaled, converted to class probabilities, and then aggregated. Temperature scaling calibrates the model confidence using a scalar temperature $T_k > 0$, which is calculated by minimizing the negative log-likelihood on the temperature-scaling calibration subset [@guo2017]. For each model $f_k$, producing logits $z^{(k)}(x)$, probabilities are then converted using temperature scaled softmax $$p^{(k)}(x; T_k) = \text{softmax}(\frac{z^{(k)}(x)}{T_k}).$$
+
+We then compute the ensemble-averaged calibrated probability for class $y$ at pixel $x$, $$\hat{p}_y(x)= \frac{1}{K} \sum_{k=1}^K p^{(k)}_y(x; T_k).$$ The ensemble prediction is thus the argmax aggregated probability. Each model’s individual probability output is also retained for computing the epistemic uncertainty proxy, member disagreement, described in the next section.
 
 ## Uncertainty Analysis
 
