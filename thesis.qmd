@@ -146,6 +146,12 @@ To evaluate the performance of vanilla and variance-aware CP under temporal drif
 
 Beyond the main evaluation metrics, we added a few complementary metrics to evaluate each method. The first is class-conditional coverage. To assess whether coverage is balanced between eelgrass and other, we compute the coverage for each individual class: $\text{Coverage}_y = \frac{1}{N_y}\sum_{i=1}^{N_y} \mathbf{1}\{\, y_i \in C(x_i) \,\}, \quad y \in \{\text{eelgrass, other}\}.$ Next, to examine the effectiveness of normalization, we examine the coverage vs. difficulty. We bin points into quantiles of $V$ and compute coverage within each bin to produce coverage vs. variance curves. Lastly, we wanted to evaluate not only how the methods handle the temporal drift but also the spatial heterogeneity, such as some areas of the estuary being more difficult to classify than others. To assess spatial robustness, we performed PCA and ordered the 2022 points along the first principal component of their coordinates. Then partition them into $B=10$ equal-sized blocks (n=100), and compute coverage within each block. We summarize spatial equity by the standard deviation of block-wise coverage and by the correlation between block-wise coverage and block-wise mean V. More metrics and visuals were also created that will be included within the results; however, these capture the main evaluation metrics.
 
+::: {#fig-spatial}
+![](images/clipboard-1176680875.png){width=80%}
+
+Spatial blocks (10 equal-count bands via PCA)
+:::
+
 # Results
 
 ## Ensemble Results
