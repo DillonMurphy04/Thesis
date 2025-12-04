@@ -147,7 +147,7 @@ To evaluate the performance of vanilla and variance-aware CP under temporal drif
 Beyond the main evaluation metrics, we added a few complementary metrics to evaluate each method. The first is class-conditional coverage. To assess whether coverage is balanced between eelgrass and other, we compute the coverage for each individual class: $\text{Coverage}_y = \frac{1}{N_y}\sum_{i=1}^{N_y} \mathbf{1}\{\, y_i \in C(x_i) \,\}, \quad y \in \{\text{eelgrass, other}\}.$ Next, to examine the effectiveness of normalization, we examine the coverage vs. difficulty. We bin points into quantiles of $V$ and compute coverage within each bin to produce coverage vs. variance curves. Lastly, we wanted to evaluate not only how the methods handle the temporal drift but also the spatial heterogeneity, such as some areas of the estuary being more difficult to classify than others. To assess spatial robustness, we performed PCA and ordered the 2022 points along the first principal component of their coordinates. Then partition them into $B=10$ equal-sized blocks (n=100), and compute coverage within each block. We summarize spatial equity by the standard deviation of block-wise coverage and by the correlation between block-wise coverage and block-wise mean V. More metrics and visuals were also created that will be included within the results; however, these capture the main evaluation metrics.
 
 ::: {#fig-spatial}
-![](images/clipboard-1176680875.png){width=80%}
+![](images/clipboard-1176680875.png){width="80%"}
 
 Spatial blocks (10 equal-count bands via PCA)
 :::
@@ -156,17 +156,413 @@ Spatial blocks (10 equal-count bands via PCA)
 
 ## Ensemble Results
 
+::: {#fig-ensemble-chip layout-ncol="1" fig-pos="H"}
+![](images/clipboard-249597789.png)
+
+Example ensemble inference outputs on a 2022 chip: Raw chip (+ point), ensemble mean eelgrass probability, ensemble variance, and argmax segmentation.
+:::
+
+```{r}
+#| label: ensemble-performance
+#| echo: false
+#| warning: false
+#| tbl-cap: "Pixel-wise performance of the ensemble and individual segmentation models on the 2022 evaluation points."
+
+ensemble_tbl <- data.frame(
+  TrainingYear = c("N/A",
+  "2021", "2021", "2021",
+  "2018–2021", "2018–2021", "2018–2021"),
+  Model = c("Ensemble",
+  "U-Net", "SAM LoRA", "DeepLab",
+  "U-Net", "SAM LoRA", "DeepLab"),
+  Precision = c(0.9046,
+  0.82, 0.82, 0.88,
+  0.88, 0.81, 0.88),
+  Recall = c(0.8688,
+  0.89, 0.89, 0.80,
+  0.78, 0.80, 0.89),
+  F_Score = c(0.8864,
+  0.86, 0.85, 0.84,
+  0.83, 0.81, 0.86),
+  Accuracy = c(0.9100,
+  0.88, 0.87, 0.88,
+  0.87, 0.84, 0.89)
+)
+
+colnames(ensemble_tbl) <- c("Training Year", "Model", "Precision",
+                            "Recall", "F Score", "Accuracy")
+
+ensemble_tbl |>
+  knitr::kable(digits = 3)
+```
+
+::: {#fig-selective-accuracy-2021 layout-ncol="1" fig-pos="H"}
+![](images/clipboard-3641659337.png)
+
+Selective accuracy-coverage curves on the 2021 in-distribution test set for entropy-based and variance-based uncertainty scores.
+:::
+
 ## In-Distribution Evaluation
+
+```{r}
+#| label: id-lambda
+#| echo: false
+#| warning: false
+#| tbl-cap: 'In-distribution (2021 test) coverage and set composition for vanilla CP, linear variance-normalized scores across ($\lambda$), and the nonparametric normalizer at $\alpha = 0.1$.'
+
+id_lambda_tbl <- data.frame(
+Method      = c("Vanilla",
+"Linear (λ = 0.5)",
+"Linear (λ = 1.0)",
+"Linear (λ = 2.0)",
+"Linear (λ = 3.0)",
+"Linear (λ = 4.0)",
+"Nonparametric"),
+qhat        = c(0.3169, 0.2975, 0.2810, 0.2540, 0.2332, 0.2163, 1.5115),
+Coverage    = c(0.900, 0.900, 0.900, 0.900, 0.900, 0.900, 0.900),
+Pct_single  = c(93.9, 93.9, 93.9, 93.9, 93.8, 93.7, 94.5),
+Pct_empty   = c(6.1, 6.1, 6.1, 6.1, 6.0, 6.1, 4.5),
+Pct_two     = c(0.0, 0.0, 0.0, 0.0, 0.1, 0.2, 1.0)
+)
+
+colnames(id_lambda_tbl) <- c("Method", "q-hat",
+"Coverage", "% singletons",
+"% empty", "% two-label")
+
+id_lambda_tbl |>
+knitr::kable(digits = 3)
+```
 
 ## Temporal OOD (2022)
 
-global coverage and set composition
+### Linear Normalization
+
+```{r}
+#| label: ood-lambda
+#| echo: false
+#| warning: false
+#| tbl-cap: 'Temporal OOD (2022) global coverage and set composition for vanilla CP and linear variance-normalized scores across $\lambda$ at $\alpha = 0.1$.'
+
+ood_lambda_tbl <- data.frame(
+Method      = c("Vanilla",
+"Linear (λ = 0.5)",
+"Linear (λ = 1.0)",
+"Linear (λ = 2.0)",
+"Linear (λ = 3.0)",
+"Linear (λ = 4.0)"),
+Coverage    = c(0.860, 0.867, 0.871, 0.891, 0.901, 0.908),
+Pct_single  = c(92.7, 94.4, 95.4, 95.6, 93.8, 92.4),
+Pct_empty   = c(7.3, 5.6, 4.5, 3.0, 2.5, 2.1),
+Pct_two     = c(0.0, 0.0, 0.1, 1.4, 3.7, 5.5)
+)
+
+colnames(ood_lambda_tbl) <- c("Method", "Coverage",
+"% singletons", "% empty", "% two-label")
+
+ood_lambda_tbl |>
+knitr::kable(digits = 3)
+```
+
+::: {#fig-cov-vs-lambda layout-ncol="1" fig-pos="H"}
+![](images/clipboard-130222262.png)
+
+Overall coverage and singleton % on 2022 OOD points as a function of the linear shrink parameter $(\lambda)$ at $(\alpha = 0.1)$.
+:::
+
+### Nonparametric Normalization
+
+::: {#fig-score-vs-var layout-ncol="1" fig-pos="H"}
+![](images/clipboard-1206416301.png)
+
+Empirical mean nonconformity score (S) versus ensemble variance (V) on the 2021 calibration set, showing the nonparametric scale function.
+:::
+
+```{r}
+#| label: ood-het
+#| echo: false
+#| warning: false
+#| tbl-cap: 'Temporal OOD (2022) global coverage and set composition for Vanilla CP, Linear normalization $(\lambda = 3)$, and the Nonparametric normalizer at $\alpha = 0.1$.'
+
+ood_unified_tbl <- data.frame(
+Method              = c("Vanilla",
+"Linear (λ = 3.0)",
+"Nonparametric"),
+EstimatedThreshold  = c(0.31691, 0.2332, 1.51146),
+OverallCoverage     = c(0.860, 0.901, 0.906),
+PctSingleton        = c(92.7, 93.8, 96.4),
+PctEmpty            = c(7.3, 2.5, 0.8),
+PctTwoLabel         = c(0.0, 3.7, 2.8)
+)
+
+colnames(ood_unified_tbl) <- c("Method",
+"q-hat",
+"Coverage",
+"% singletons",
+"% empty",
+"% two-label")
+
+ood_unified_tbl |>
+knitr::kable(digits = 3)
+
+```
+
+::: {#fig-cov-vs-var layout-ncol="1" fig-pos="H"}
+![](images/clipboard-2540638404.png)
+
+Coverage on 2022 OOD points as a function of ensemble-variance bins for vanilla, linear $(\lambda = 3)$, and nonparametric normalization.
+:::
 
 ## Class Conditional Coverage
 
+```{r}
+#| label: class-cond-2022
+#| echo: false
+#| warning: false
+#| tbl-cap: 'Per-class coverage on 2022 OOD points at $\alpha = 0.1$ for vanilla CP, linear normalization $(\lambda = 3)$, and the nonparametric normalizer.'
+
+class_cond_tbl <- data.frame(
+Method      = c("Vanilla",
+"Linear (λ = 3.0)",
+"Nonparametric"),
+Coverage_bg = c(0.914, 0.943, 0.946),
+Coverage_eg = c(0.780, 0.839, 0.847),
+Diff = c(0.134, 0.104, 0.099)
+)
+
+colnames(class_cond_tbl) <- c("Method",
+"Coverage (background)",
+"Coverage (eelgrass)",
+"Difference")
+
+class_cond_tbl |>
+knitr::kable(digits = 3)
+
+```
+
 ## Spatial Robustness within 2022
 
-## Sensitivity
+```{r}
+#| label: spatial-diagnostics
+#| echo: false
+#| warning: false
+#| tbl-cap: "Spatial robustness diagnostics on 2022 OOD points: standard deviation of block-wise coverage and correlation between block-wise mean variance and coverage for each method (10 spatial blocks)."
+
+spatial_tbl <- data.frame(
+Method                  = c("Vanilla",
+"Linear (λ = 3.0)",
+"Nonparametric"),
+BlockCoverageSD         = c(0.0712, 0.0570, 0.0406),
+CorMeanVarCoverage_r    = c(-0.612, -0.321, -0.217),
+CorMeanVarCoverage_p    = c(0.0598, 0.3655, 0.5470)
+)
+
+colnames(spatial_tbl) <- c("Method",
+"SD",
+"Correlation r",
+"p-value")
+
+spatial_tbl |>
+knitr::kable(digits = 3)
+```
+
+::: {#fig-var-block layout-ncol="1" fig-pos="H"}
+![](images/clipboard-562555667.png)
+
+Per-block mean variance for 2022 points
+:::
+
+::: {#fig-cov-vs-block layout-ncol="1" fig-pos="H"}
+![](images/clipboard-1768455712.png)
+
+Per-block coverage for 2022 points for vanilla, linear $(\lambda=3)$, and nonparametric methods
+:::
+
+::: {#fig-cov-vs-var-spatial layout-ncol="1" fig-pos="H"}
+![](images/clipboard-4121891705.png)
+
+Scatter plot of block-wise coverage vs mean variance for vanilla, linear $(\lambda=2)$, and nonparametric methods
+:::
+
+::: {#fig-clipped-raster layout-ncol="2" fig-pos="H"}
+![2022 Raster](images/clipboard-1704204551.png)
+
+![2022 Overlayed Ground Truth Points](images/clipboard-2841130883.png)
+
+Visuals of the 2022 raster and overlayed ground truth points (Blue = Other, Green = Eelgrass).
+:::
+
+::: {#fig-spatial-sets layout-ncol="1" fig-pos="H"}
+![](images/clipboard-2804289541.png)
+
+Set composition overlay for 2022 raster for vanilla, linear $(\lambda=3)$, and nonparametric methods.
+:::
+
+::: {#fig-changes layout-ncol="1" fig-pos="H"}
+![](images/clipboard-1579065478.png)
+
+Set composition changes from vanilla for linear $(\lambda=3)$ and nonparametric methods
+:::
+
+## Sensitivity Analysis
+
+```{r}
+#| echo: false
+#| message: false
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+ablation_summary <- read_csv("data/ablation_summary.csv")
+```
+
+```{r}
+#| label: ablation-table-2022
+#| echo: false
+#| warning: false
+#| message: false
+#| tbl-cap: 'Coverage and set composition on 2022 OOD points across $\alpha \in \{0.10, 0.05, 0.025\}$ and methods.'
+
+library(dplyr)
+library(kableExtra)
+
+ablation_2022_tbl <- ablation_summary |>
+  filter(domain == "2022_OOD") |>
+  arrange(alpha, method) |>
+  transmute(
+    alpha,
+    Method    = method,
+    Coverage  = coverage_overall,
+    Empty     = 100 * pct_empty,
+    Single    = 100 * pct_single,
+    Two_label = 100 * pct_two
+  )
+
+# row ranges for each alpha group
+group_info <- ablation_2022_tbl |>
+  mutate(row_id = row_number()) |>
+  group_by(alpha) |>
+  summarise(
+    start = min(row_id),
+    end   = max(row_id),
+    .groups = "drop"
+  )
+
+# table body without the alpha column
+tbl_body <- ablation_2022_tbl |>
+  select(-alpha)
+
+tab <- tbl_body |>
+  knitr::kable(
+    digits = c(3, 3, 1, 1, 1),
+    col.names = c(
+      "Method",
+      "Coverage",
+      "Empty (%)",
+      "Single (%)",
+      "Two-label (%)"
+    ),
+    booktabs = TRUE
+  ) |>
+  kable_styling(full_width = FALSE)
+
+# add “Alpha = ...” subsections
+for (i in seq_len(nrow(group_info))) {
+  tab <- tab |>
+    group_rows(
+      paste0("α = ", group_info$alpha[i]),
+      group_info$start[i],
+      group_info$end[i]
+    )
+}
+
+tab
+```
+
+```{r}
+#| label: ablation-coverage-2022
+#| echo: false
+#| warning: false
+#| fig-cap: 'Overall coverage on 2022 OOD points across $\alpha \in \{0.1, 0.05, 0.025\}$ for each method. Dashed line shows the target coverage 1 - α.'
+
+ablation_2022 <- ablation_summary |>
+  filter(domain == "2022_OOD")
+
+gg_coverage <- ggplot(
+  ablation_2022,
+  aes(x = factor(alpha),
+      y = coverage_overall,
+      color = method,
+      group = method)
+) +
+  geom_point(size = 2) +
+  geom_line() +
+  # target line(s): 1 - alpha
+  geom_hline(
+    data = distinct(ablation_2022, alpha, target_cov),
+    aes(yintercept = target_cov),
+    linetype = "dashed",
+    color   = "grey40"
+  ) +
+  labs(
+    x = expression(alpha),
+    y = "Coverage",
+    color = "Method"
+  ) +
+  coord_cartesian(ylim = c(0.85, 1)) +
+  theme_minimal()
+
+gg_coverage
+```
+```{r}
+#| label: ablation-setcomp-2022
+#| echo: false
+#| warning: false
+#| fig-cap: 'Set composition (empty, single, two-label) for each method on 2022 OOD points across $\alpha \in \{0.1, 0.05, 0.025\}$.'
+
+setcomp_2022 <- ablation_summary |>
+  filter(domain == "2022_OOD") |>
+  select(method, alpha, pct_empty, pct_single, pct_two) |>
+  pivot_longer(
+    cols = starts_with("pct_"),
+    names_to = "SetType",
+    values_to = "Pct"
+  ) |>
+  mutate(
+    SetType = recode(
+      SetType,
+      pct_empty  = "Empty",
+      pct_single = "Single",
+      pct_two    = "Two-label"
+    ),
+    Pct   = 100 * Pct,
+    alpha = factor(alpha)   # keep alphas ordered but treat as factor for faceting
+  )
+
+gg_setcomp <- ggplot(
+  setcomp_2022,
+  aes(x = method, y = Pct, fill = SetType)
+) +
+  geom_col(position = "stack") +
+  facet_wrap(
+    ~ alpha,
+    nrow = 1,
+    labeller = labeller(alpha = function(x) paste0("alpha = ", x))
+  ) +
+  labs(
+    x = "Method",
+    y = "Set composition (%)",
+    fill = "Set type"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 15, hjust = 1),
+    strip.text  = element_text(size = 9)
+  )
+
+gg_setcomp
+```
 
 # Discussion
 
