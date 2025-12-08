@@ -25,6 +25,19 @@ format:
     include-in-header: frontmatter/formating.tex
 ---
 
+```{r}
+#| echo: false
+#| message: false
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(kableExtra)
+
+ablation_summary <- read_csv("data/ablation_summary.csv")
+```
+
 # Introduction
 
 Eelgrass (*Zostera marina*) is a seagrass species of temperate waters that provides an anchor to coastal ecosystems by providing sediment stabilization, carbon sequestration, eliminating contamination, and providing habitats for protected species. Warming oceans, storm regimes, and local disturbance have quickly reshaped the intertidal morphology and habitat extent. As these threats increase, there is a need to monitor changes to determine appropriate environmental management. In recent years, deep networks have made this intertidal mapping practical in complex imagery, achieving strong pixel-wise accuracy in areas such as Morro Bay, California [@tallam2023]. However, the reliability of general utilization of these classification models not only relies on high-accuracy segmentation, but also on rigorous uncertainty quantification under temporal and spatial distribution shift. Imagery collected over different years, at different tides or seasons, can erode the model's calibration, causing it to be over-confident. This study builds off these models to create a post hoc uncertainty framework.
@@ -156,14 +169,18 @@ Spatial blocks (10 equal-count bands via PCA)
 
 ## Ensemble Results
 
+@fig-ensemble-chip shows a representative 2022 chip with the ensemble outputs. This includes the raw chip imagery, the ensemble mean probability for the target class, the ensemble variance, and the final argmax segmentation. Visually, it seems that high ensemble variance aligns with boundaries between eelgrass and non-eelgrass patches as well as ambiguous pixels, such as darker shadows or where features resemble eelgrass RGB. In the example chip, it can be clearly seen that the variance spikes at the boundary between eelgrass and non-eelgrass patches. These results suggest that the disagreement signal is capturing the genuinely difficult pixels in the imagery.
+
 ::: {#fig-ensemble-chip layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-249597789.png)
 
-Example ensemble inference outputs on a 2022 chip: Raw chip (+ point), ensemble mean eelgrass probability, ensemble variance, and argmax segmentation.
+Example ensemble inference outputs on a 2022 chip: Raw chip (+ point), ensemble mean probability, ensemble variance, and argmax segmentation.
 :::
 
+@tbl-ensemble-performance summarizes the pixel-wise performance of the ensemble and individual models on the 1,000 2022 points for comparison. The heterogeneous ensemble achieves an accuracy of 0.910 and an F-score of 0.886, outperforming all individual members, whose accuracies range from 0.840–0.890 and F-scores from 0.810–0.860. This aligns with previous literature on deep ensembles, which has reported higher accuracy and better-calibrated uncertainty compared to individual models. Another important note is that the precision (0.905) and recall (0.886) are relatively balanced for the deep ensemble.
+
 ```{r}
-#| label: ensemble-performance
+#| label: tbl-ensemble-performance
 #| echo: false
 #| warning: false
 #| tbl-cap: "Pixel-wise performance of the ensemble and individual segmentation models on the 2022 evaluation points."
@@ -196,6 +213,8 @@ ensemble_tbl |>
   knitr::kable(digits = 3)
 ```
 
+To assess how informative the uncertainty measure is, we created selective-accuracy curves on the 2021 in-distribution test set in @fig-selective-accuracy-2021. The graph plots 3 metrics: predictive entropy, mutual information, and ensemble variance. For all three metrics, selective accuracy increases sharply as we remove the most uncertain points and then plateaus at an accuracy of about 0.98 for all metrics. This confirms that each metric is meaningfully ordering the errors. The area under the selective accuracy curve (SAUC) is highest for entropy (0.9682) and then closely followed by variance (0.9619), suggesting entropy is the best for ordering the errors. However, as mentioned previously, since entropy is implicitly used in the vanilla conformal score and because variance can directly act as a proxy for epistemic uncertainty, growing under drift, variance is still chosen as the metric of choice.
+
 ::: {#fig-selective-accuracy-2021 layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-3641659337.png)
 
@@ -204,34 +223,73 @@ Selective accuracy-coverage curves on the 2021 in-distribution test set for entr
 
 ## In-Distribution Evaluation
 
+@tbl-id-lambda displays the coverage and set composition on the 2021 test set for vanilla split CP, linear variance-normalized scores across the $\lambda$ grid, and the nonparametric normalizer, all at a target $\alpha = 0.1$. As expected, all methods achieved the marginal coverage of 0.9 in 2021. The coverage was very tight, as all methods achieved exactly 0.900 coverage. This confirms that the scores were correctly calibrated in distribution. 
+
 ```{r}
-#| label: id-lambda
+#| label: tbl-id-lambda
 #| echo: false
 #| warning: false
 #| tbl-cap: 'In-distribution (2021 test) coverage and set composition for vanilla CP, linear variance-normalized scores across ($\lambda$), and the nonparametric normalizer at $\alpha = 0.1$.'
 
 id_lambda_tbl <- data.frame(
-Method      = c("Vanilla",
-"Linear (λ = 0.5)",
-"Linear (λ = 1.0)",
-"Linear (λ = 2.0)",
-"Linear (λ = 3.0)",
-"Linear (λ = 4.0)",
-"Nonparametric"),
-qhat        = c(0.3169, 0.2975, 0.2810, 0.2540, 0.2332, 0.2163, 1.5115),
-Coverage    = c(0.900, 0.900, 0.900, 0.900, 0.900, 0.900, 0.900),
-Pct_single  = c(93.9, 93.9, 93.9, 93.9, 93.8, 93.7, 94.5),
-Pct_empty   = c(6.1, 6.1, 6.1, 6.1, 6.0, 6.1, 4.5),
-Pct_two     = c(0.0, 0.0, 0.0, 0.0, 0.1, 0.2, 1.0)
+  Method      = c("Vanilla",
+  "Linear (λ = 0.5)",
+  "Linear (λ = 1.0)",
+  "Linear (λ = 2.0)",
+  "Linear (λ = 3.0)",
+  "Linear (λ = 4.0)",
+  "Nonparametric"),
+  qhat        = c(0.3169, 0.2975, 0.2810, 0.2540, 0.2332, 0.2163, 1.5115),
+  Coverage    = c(0.900, 0.900, 0.900, 0.900, 0.900, 0.900, 0.900),
+  Pct_single  = c(93.9, 93.9, 93.9, 93.9, 93.8, 93.7, 94.5),
+  Pct_empty   = c(6.1, 6.1, 6.1, 6.1, 6.0, 6.1, 4.5),
+  Pct_two     = c(0.0, 0.0, 0.0, 0.0, 0.1, 0.2, 1.0)
 )
 
 colnames(id_lambda_tbl) <- c("Method", "q-hat",
-"Coverage", "% singletons",
-"% empty", "% two-label")
-
-id_lambda_tbl |>
-knitr::kable(digits = 3)
+  "Coverage", "% singletons",
+  "% empty", "% two-label")
+  
+  id_lambda_tbl |>
+  knitr::kable(digits = 3)
 ```
+
+For the in-distribution evaluation for the linear scale, varying the $\lambda$ has a very minor effect on the set composition. The fraction of singletons remains almost unchanged (from 93.9 to 93.7) from $\lambda=0$ (vanilla) to $\lambda=4$ and with only a very slight increase in two-label sets (0.2). This stability can be explained by the high concentration of low-variance pixels in the in-distribution 2021 data. As shown in @tbl-variance-bins, 92.6% of the pixels of 2021 fall in the lowest variance bin $[0,0.1)$ and fewer than 1% above 0.3. Since almost all points have a small variance, the linear shrink factor $(1 + \lambda V)$ is relatively close to 1 for the entire test set. Thus, dividing by the $(1 + \lambda V)$ only mildly rescales the original scores without large changes to the ranking of the scores. Since the split CP depends on the score ordering and the threshold is recalibrated for each $\lambda$, the same label scores generally lie above or below the conformal threshold, resulting in almost identical set composition.
+
+The nonparametric normalizer does produce a slightly different set composition even in-distribution compared to the linear/vanilla scores. The nonparametric normalizer defines its correction parameter using (approximately) equal-size bins on the calibration set, as seen in @fig-score-vs-var. So even within the low variance bin [0,0.1) there are different scale factors. In @fig-score-vs-var, we can see that there is a sharp incline of scale factor within this bin. Thus, the nonparametric method has a more heterogeneous rescaling in the small variance regions, which can slightly alter the score ranking, resulting in a slight change in set composition. While coverage remained at 0.9, a slightly different subset of label scores crossed the threshold, which thus changes the set prediction of the points.
+
+```{r}
+#| label: tbl-variance-bins
+#| echo: false
+#| warning: false
+#| tbl-cap: 'Distribution of normalized ensemble variance across bins for 2021 (ID) and 2022 (OOD) evaluation points.'
+
+variance_bins_tbl <- data.frame(
+  Bin = c("[0.0, 0.1)",
+  "[0.1, 0.2)",
+  "[0.2, 0.3)",
+  "[0.3, 0.4)",
+  "[0.4, 0.5)",
+  "[0.5, 0.6)",
+  "[0.6, 0.7)",
+  "[0.7, 0.8)",
+  "[0.8, 0.9)",
+  "[0.9, 1.0)"),
+  N_2021 = c(925818, 43489, 16067, 7798, 3998, 2143, 531, 110, 35, 11),
+  Pct_2021 = c(92.6, 4.3, 1.6, 0.8, 0.4, 0.2, 0.1, 0.0, 0.0, 0.0),
+  N_2022 = c(700, 62, 58, 43, 43, 35, 25, 9, 13, 12),
+  Pct_2022 = c(70.0, 6.2, 5.8, 4.3, 4.3, 3.5, 2.5, 0.9, 1.3, 1.2)
+)
+
+variance_bins_tbl |>
+  kbl(
+  digits = c(0, 0, 1, 0, 1),
+  col.names = c("Variance bin", "N", "%", "N", "%"),
+  booktabs = TRUE
+  ) |>
+  add_header_above(c(" " = 1, "2021" = 2, "2022" = 2))
+```
+
 
 ## Temporal OOD (2022)
 
@@ -262,6 +320,8 @@ colnames(ood_lambda_tbl) <- c("Method", "Coverage",
 ood_lambda_tbl |>
 knitr::kable(digits = 3)
 ```
+
+
 
 ::: {#fig-cov-vs-lambda layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-130222262.png)
@@ -406,26 +466,11 @@ Set composition changes from vanilla for linear $(\lambda=3)$ and nonparametric 
 ## Sensitivity Analysis
 
 ```{r}
-#| echo: false
-#| message: false
-
-library(readr)
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-
-ablation_summary <- read_csv("data/ablation_summary.csv")
-```
-
-```{r}
 #| label: ablation-table-2022
 #| echo: false
 #| warning: false
 #| message: false
 #| tbl-cap: 'Coverage and set composition on 2022 OOD points across $\alpha \in \{0.10, 0.05, 0.025\}$ and methods.'
-
-library(dplyr)
-library(kableExtra)
 
 ablation_2022_tbl <- ablation_summary |>
   filter(domain == "2022_OOD") |>
