@@ -1,4 +1,7 @@
 ---
+execute:
+  warning: false
+  message: false
 format:
   pdf:
     documentclass: report
@@ -296,7 +299,7 @@ variance_bins_tbl |>
 ### Linear Normalization
 
 ```{r}
-#| label: ood-lambda
+#| label: tbl-ood-lambda
 #| echo: false
 #| warning: false
 #| tbl-cap: 'Temporal OOD (2022) global coverage and set composition for vanilla CP and linear variance-normalized scores across $\lambda$ at $\alpha = 0.1$.'
@@ -321,7 +324,7 @@ ood_lambda_tbl |>
 knitr::kable(digits = 3)
 ```
 
-
+@tbl-ood-lambda and @fig-cov-vs-lambda show how OOD performance on the 2022 points changes as the linear shrink parameter $\lambda$ is increased. Vanilla CP undercovers with an empirical coverage of 0.860 for a target of 0.90, reflecting the impact of the temporal drift on the score distribution. As we increase $\lambda$, coverage increases monotonically, all the way up to 0.908 at $\lambda = 4$. This comes with the expected trade-off in set composition. The percentage of singletons initially rises, as the percentage of empty sets decreases sharply without a large increase in two-class sets. Singleton percentage then decreases for $\lambda>2$ as the percentage of two-class sets continues to increase. $\lambda$ of 3 was chosen as the best choice, as it was the first value to retain target coverage (0.901) while still increasing singletons (93.8%) and with only a modest increase in two class sets (3.7).
 
 ::: {#fig-cov-vs-lambda layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-130222262.png)
@@ -331,14 +334,18 @@ Overall coverage and singleton % on 2022 OOD points as a function of the linear 
 
 ### Nonparametric Normalization
 
+To better match the relationship between nonconformity scores and ensemble variance, as well as remove the need for parameter tuning, we estimated the nonparametric scale function $\hat a(V) \approx E[S|V]$ on the 2021 calibration set. @fig-score-vs-var shows the mean score as a function of variance. Average scores increase nonlinearly, increasing rapidly in low variance regions before leveling out. Scores were binned into equal-sized bins, and as seen in @tbl-variance-bins, a majority of points in the calibration set were low variance.
+
 ::: {#fig-score-vs-var layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-1206416301.png)
 
 Empirical mean nonconformity score (S) versus ensemble variance (V) on the 2021 calibration set, showing the nonparametric scale function.
 :::
 
+@tbl-ood-het provides a comparison of vanilla CP, the chosen “best” linear method at $\lambda=3$, and the nonparametric normalizer on 2022 points. While both adaptive methods retain target coverage on the test set, the nonparametric method resulted in a slightly higher coverage of 0.906, making it slightly more conservative at $\alpha=0.1$. The nonparametric method can do this while also yielding the most favorable set composition with the highest percentage of singletons at 96.4%.
+
 ```{r}
-#| label: ood-het
+#| label: tbl-ood-het
 #| echo: false
 #| warning: false
 #| tbl-cap: 'Temporal OOD (2022) global coverage and set composition for Vanilla CP, Linear normalization $(\lambda = 3)$, and the Nonparametric normalizer at $\alpha = 0.1$.'
@@ -365,6 +372,8 @@ ood_unified_tbl |>
 knitr::kable(digits = 3)
 
 ```
+
+The coverage vs variance plot in @fig-cov-vs-var visually compares the three methods and the effect of normalization. The average coverage is calculated for each of the 10 equally sized variance bins (as shown in the figure, the test set resulted in a much wider spread of variance for higher variance regions). Vanilla CP has a fairly steady decline as variance increases, indicating that points with high ensemble disagreement tend to be undercovered. The linear method reduces the decline and even reverses the trend for the very high-variance regions, while the nonparametric method results in the most even and closest to target coverage among all variance bins. This suggests the variance-aware normalization is successfully becoming more conservative in difficult or shifted regions.
 
 ::: {#fig-cov-vs-var layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-2540638404.png)
