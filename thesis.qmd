@@ -383,8 +383,10 @@ Coverage on 2022 OOD points as a function of ensemble-variance bins for vanilla,
 
 ## Class Conditional Coverage
 
+@tbl-class-cond-2022 reports the per-class coverage for the 2022 OOD points for the vanilla, linear $\lambda=3$, and nonparametric methods. All the methods achieved higher coverage on the background pixels than on eelgrass, reflecting a slight class imbalance. The linear normalization method improves coverage for both classes from vanilla and the nonparametric normalization sees further improvement. Additionally, the linear normalization method improves the disparity in coverage between background and eelgrass classes as it shrinks the percentage difference from 13.4% to 10.4%. The nonparametric method improves further, shrinking the gap to 9.9%. Variance-aware normalization reduces the disparity in the coverage between the two classes.
+
 ```{r}
-#| label: class-cond-2022
+#| label: tbl-class-cond-2022
 #| echo: false
 #| warning: false
 #| tbl-cap: 'Per-class coverage on 2022 OOD points at $\alpha = 0.1$ for vanilla CP, linear normalization $(\lambda = 3)$, and the nonparametric normalizer.'
@@ -410,8 +412,10 @@ knitr::kable(digits = 3)
 
 ## Spatial Robustness within 2022
 
+As previously mentioned, spatial robustness is evaluated by grouping the 2022 points into ten spatial blocks based on principal-component ordering of the coordinates and then computing coverage within each block. @tbl-spatial-diagnostics reports the standard deviation of the block-wise coverage and the correlation between the block-wise mean ensemble variance and coverage. As expected, vanilla CP displays the highest block-wise standard deviation in coverage (SD=0.071) as well as a fairly strong negative correlation between mean variance and coverage (r= -0.61, p=0.06). Linear normalization reduces spatial variability and weakens the correlation compared to vanilla, while the nonparametric method yields the least variable blocks (SD=0.041) and the most weakly correlated coverage (r=0.041, p>0.5). 
+
 ```{r}
-#| label: spatial-diagnostics
+#| label: tbl-spatial-diagnostics
 #| echo: false
 #| warning: false
 #| tbl-cap: "Spatial robustness diagnostics on 2022 OOD points: standard deviation of block-wise coverage and correlation between block-wise mean variance and coverage for each method (10 spatial blocks)."
@@ -434,6 +438,8 @@ spatial_tbl |>
 knitr::kable(digits = 3)
 ```
 
+@fig-var-block, @fig-cov-vs-block, and @fig-cov-vs-var-spatial further visualize the summary statistics. @fig-var-block shows the per-block mean variance to provide an understanding of how much the variance deviates per spatial block. Some areas seem to have consistently higher uncertainty compared to others, such as blocks 1 and 2. @fig-cov-vs-block visualized the per-block coverage for each method. Variance-normalized methods both greatly outperform the vanilla method, and the nonparametric method has the most equal performance, with the majority of blocks being very close to the target coverage. @fig-cov-vs-var-spatial visualizes the correlation between the block-wise coverage and mean variance, showing how the nonparametric method specifically reduces the negative correlation between variance and coverage.
+
 ::: {#fig-var-block layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-562555667.png)
 
@@ -449,8 +455,10 @@ Per-block coverage for 2022 points for vanilla, linear $(\lambda=3)$, and nonpar
 ::: {#fig-cov-vs-var-spatial layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-4121891705.png)
 
-Scatter plot of block-wise coverage vs mean variance for vanilla, linear $(\lambda=2)$, and nonparametric methods
+Scatter plot of block-wise coverage vs mean variance for vanilla, linear $(\lambda=3)$, and nonparametric methods
 :::
+
+Finally, @fig-clipped-raster, @fig-spatial-sets, and @fig-changes show the actual raster and overlaid predictions. @fig-clipped-raster shows the 2022 raster as well as the ground truth points. As seen in the figure, the majority of eelgrass points are centered in the middle of the estuary imagery.
 
 ::: {#fig-clipped-raster layout-ncol="2" fig-pos="H"}
 ![2022 Raster](images/clipboard-1704204551.png)
@@ -460,11 +468,15 @@ Scatter plot of block-wise coverage vs mean variance for vanilla, linear $(\lamb
 Visuals of the 2022 raster and overlayed ground truth points (Blue = Other, Green = Eelgrass).
 :::
 
+@fig-spatial-sets displays the set composition for vanilla, linear, and nonparametric methods. As seen in the image, there appears to be a high uncertainty region towards the top end of the estuary. For this region, the vanilla CP method reported a majority of incorrect singletons or empty sets, while the normalized methods converted many of these into two-class sets. The vanilla method has quite a few empty sets and almost no two-set classes. The linear method reduces the number of empty sets, and the nonparametric method reduces this number further, with some being converted to singletons and some two-set classes.
+
 ::: {#fig-spatial-sets layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-2804289541.png)
 
 Set composition overlay for 2022 raster for vanilla, linear $(\lambda=3)$, and nonparametric methods.
 :::
+
+@fig-changes provides a simplified view of @fig-spatial-sets by simply visualizing the sets that changed from vanilla to each variance-normalized method. The uncertain regions align between the two methods, as many of the two-set class changes occur in the same relative area. Interestingly, the non-parametric method creates more empty set classes from vanilla compared to linear, as the expected score over-normalizes these raw score values.
 
 ::: {#fig-changes layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-1579065478.png)
@@ -474,8 +486,10 @@ Set composition changes from vanilla for linear $(\lambda=3)$ and nonparametric 
 
 ## Sensitivity Analysis
 
+Lastly, we examined how the methods performed across different target miscoverage levels ($\alpha \in \{0.10, 0.05, 0.025\}$). @tbl-ablation-2022 reports the coverage and set composition for each method and $\alpha$. @fig-ablation-coverage-2022 provides a visual of the overall coverage trend for each method, while @fig-ablation-setcomp-2022 provides a comparative visual of the set compositions. 
+
 ```{r}
-#| label: ablation-table-2022
+#| label: tbl-ablation-2022
 #| echo: false
 #| warning: false
 #| message: false
@@ -534,8 +548,10 @@ for (i in seq_len(nrow(group_info))) {
 tab
 ```
 
+Across all $\alpha$ levels, the main pattern seen at $\alpha=0.01$ continues to be true. Vanilla CP largely undercovers, while the variance-aware normalization methods can move the coverage closer to or slightly above the target coverage. The nonparametric method appears to perform best for both $\alpha=0.1$ and $\alpha=0.025$, while the linear method is the only method to exceed the target coverage for $\alpha=0.025$.
+
 ```{r}
-#| label: ablation-coverage-2022
+#| label: fig-ablation-coverage-2022
 #| echo: false
 #| warning: false
 #| fig-cap: 'Overall coverage on 2022 OOD points across $\alpha \in \{0.1, 0.05, 0.025\}$ for each method. Dashed line shows the target coverage 1 - α.'
@@ -569,8 +585,10 @@ gg_coverage <- ggplot(
 
 gg_coverage
 ```
+As expected, the variance-aware normalization methods both increase the number of two-set classes compared to vanilla CP, a necessary tradeoff to achieve target coverage. However, the methods are not providing overly conservative results, as the empirical coverages were close to the targets, with no extreme inflation of two-class sets. The methods produce conservative estimates when needed, flagging areas where two-set class predictions are necessary.
+
 ```{r}
-#| label: ablation-setcomp-2022
+#| label: fig-ablation-setcomp-2022
 #| echo: false
 #| warning: false
 #| fig-cap: 'Set composition (empty, single, two-label) for each method on 2022 OOD points across $\alpha \in \{0.1, 0.05, 0.025\}$.'
@@ -617,8 +635,6 @@ gg_setcomp <- ggplot(
 
 gg_setcomp
 ```
-
-# Discussion
 
 # Limitations
 
