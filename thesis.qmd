@@ -635,12 +635,21 @@ gg_setcomp <- ggplot(
 
 gg_setcomp
 ```
+# Conclusion
+
+This study developed and evaluated a practical uncertainty pipeline for time-series eelgrass segmentation that is reliable under temporal distribution shift. We were motivated by the reality that ecological modeling is deployed across years with differing image conditions and requires useful uncertainty estimates for truly reliable models. Building off existing strong deep segmentation models, we combined heterogeneous deep ensembles, probability calibration, and conformal prediction to produce classification sets at a user-defined confidence level. While standard conformal prediction provides finite-sample marginal coverage under exchangeability, realistic year-over-year imagery often violates this assumption, causing conformal prediction to under-cover on temporally shifted data and resulting in a larger concentration of errors in the most difficult regions, precisely where uncertainty estimates would be most useful. 
+
+The primary contribution is a variance-aware normalization strategy for conformal classification. We normalized the vanilla nonconformity score by ensemble disagreement (member-probability variance after temperature scaling) as a proxy for epistemic difficulty. We specifically studied two variants: a parametric linear normalization $S/(1+\lambda V)$ and a nonparametric normalization $S/\hat{a}V$ with $\hat {a} \approx E[S|V=v]$ learned via quantile binning and interpolation on the calibration set. The approach is based on score normalization ideas in conformal prediction, which have not been thoroughly investigated under drift.
+
+On Morro Bay imagery, the ensemble improved predictive performance compared to the individual models, and the produced uncertainty scores effectively ordered errors. In distribution (2021), all conformal methods achieved target coverage on a held-out test set with very similar set compositions, which confirms that the normalization does not degrade coverage under exchangeability. Under temporal shift (2022), vanilla conformal prediction under-covered, with errors, specifically concentrated on areas of high uncertainty. Variance-aware normalization was able to largely mitigate the issue and recover the lost coverage. The linear method recovered nominal coverage under a moderate $\lambda$ of 3, resulting in a reduction of empty sets and a slight increase in 2-set classes. The nonparametric method performed the best overall, achieving near or slightly conservative coverage for all $\alpha$ and best set composition. Beyond the global coverage, variance-aware normalization also improved the class-conditional coverage disparity by reducing the gap between eelgrass coverage and other. It also improved the spatial robustness by lowering blockwise coverage variability and weakening the relationship between blockwise coverage and uncertainty.
+
+Overall, the results support the claim that a shift-aware epistemic proxy can be used to stabilize the conformal scores under a slight temporal shift without retraining, test-time labels, or any additional models training beyond those trained during model selection. This framework can be especially useful for environmental monitoring as it provides users with both predictions and an estimate of reliability. It flags areas of uncertainty, where future annotations would be most impactful. 
 
 # Limitations
 
-# Conclusion
+There are several limitations to be considered with the conclusion. First, conformal coverage guarantees are formally tied to exchangeability. While variance-aware normalization improved the empirical robustness under drift, it does not provide a theoretical guarantee. The approach relies on the assumption that the relationship between score magnitude and the difficulty proxy is stable across years, which could fail under larger shifts. Additionally, the study evaluates temporal OOD behavior using point-labeled 2022 data, as full polygon data labeling can be quite extensive. This can be useful, but could miss spatial patterns in fully segmented tiles. Lastly, the uncertainty metric is approximated via ensembles. Although this is a common method for approximating uncertainty, it also introduces additional computational cost.
 
-## Computational Details
+# Computational Details
 
 # REFERENCES {.unnumbered}
 
