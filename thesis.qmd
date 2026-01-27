@@ -182,12 +182,12 @@ The key assumption is that the relationship between score and difficulty is appr
 
 ## CP Evaluation
 
-To evaluate the performance of vanilla and variance-aware CP under temporal drift, two main metrics were evaluated with a few complementary metrics. The first, and most important, evaluating metric is global marginal coverage. This can simply be calculated as the proportion of evaluation sets including the ground truth: $\text{Coverage} = \frac{1}{N}\sum_{i=1}^{N} \mathbf{1}\{\, y_i \in C(x_i) \,\}.$ This is then compared to the target $1-\alpha$ coverage. The next metric to take a look at is the set composition. For each pixel, the prediction set can be empty ($\emptyset$), a singleton ({eelgrass} or {other}), or the full set ({eelgrass, other}). We report the proportion of each category and can use this to measure the efficiency of the sets. A good conformal model in binary settings aims to maximize the number of singletons while retaining coverage $\geq$ target.
+To evaluate the performance of vanilla and variance-aware CP under temporal drift, two main metrics were evaluated with a few complementary metrics. The first, and most important, evaluating metric is global marginal coverage. This can simply be calculated as the proportion of evaluation sets including the ground truth: $$\text{Coverage} = \frac{1}{N}\sum_{i=1}^{N} \mathbf{1}\{\, y_i \in C(x_i) \,\}$$ This is then compared to the target $1-\alpha$ coverage. The next metric to examine is the set composition. For each pixel, the prediction set can be empty ($\emptyset$), a singleton ({eelgrass} or {other}), or the full set ({eelgrass, other}). We report the proportion of each category and can use this to measure the efficiency of the sets. A good conformal model in binary settings aims to maximize the number of singletons while retaining coverage $\geq$ target. This evaluation method can be extended to the multiclass setting, where predictions may contain more than two labels and efficiency is instead measured by *minimizing* the average set size. In the binary case, set composition provides the most interpretable results, as the empty and two-set cases both represent two extremes of uncertainty, while singletons correspond to the most informative predictions.
 
-Beyond the main evaluation metrics, we added a few complementary metrics to evaluate each method. The first is class-conditional coverage. To assess whether coverage is balanced between eelgrass and other, we compute the coverage for each individual class: $\text{Coverage}_y = \frac{1}{N_y}\sum_{i=1}^{N_y} \mathbf{1}\{\, y_i \in C(x_i) \,\}, \quad y \in \{\text{eelgrass, other}\}.$ Next, to examine the effectiveness of normalization, we examine the coverage vs. difficulty. We bin points into quantiles of $V$ and compute coverage within each bin to produce coverage vs. variance curves. Lastly, we wanted to evaluate not only how the methods handle the temporal drift but also the spatial heterogeneity, such as some areas of the estuary being more difficult to classify than others. Spatial robustness was assessed by partitioning the 2022 evaluation points spatially localized blocks. Points were projected to planar coordinates (meters) and ordered using Morton (Z-order) space filling curve to preserve spatial locality. We partitioned the ordering into $B=10$ equal-sized blocks (n=100), and compute coverage within each block. We summarize spatial equity by the standard deviation of block-wise coverage and by the correlation between block-wise coverage and block-wise mean V. More metrics and visuals were also created that will be included within the results; however, these capture the main evaluation metrics.
+Beyond the main evaluation metrics, we added a few complementary metrics to evaluate each method. The first is class-conditional coverage. To assess whether coverage is balanced between eelgrass and other, we compute the coverage for each individual class: $$\text{Coverage}_y = \frac{1}{N_y}\sum_{i=1}^{N_y} \mathbf{1}\{\, y_i \in C(x_i) \,\}, \quad y \in \{\text{eelgrass, other}\}$$ Next, to examine the effectiveness of normalization, we examine the coverage vs. difficulty. We bin observations into quantiles of $V$ and compute coverage within each bin to produce coverage vs. variance curves. Lastly, we aimed to evaluate not only how the methods handle temporal drift but also spatial heterogeneity, such as areas of the estuary being more difficult to classify than others. Spatial robustness was assessed by partitioning the 2022 evaluation points into spatially localized blocks. Points were projected to planar coordinates (meters) and ordered using Morton (Z-order) space-filling curve to preserve spatial locality. We partitioned the ordering into $B=10$ equal-sized blocks (n=100), and computed coverage within each block. We summarize spatial equity by the standard deviation of block-wise coverage and by the correlation between block-wise coverage and block-wise mean V. More metrics and visuals were also created that will be included within the results; however, these capture the main evaluation metrics.
 
 ::: {#fig-spatial}
-![](images/clipboard-429324029.png){width="80%"}
+![](images/clipboard-429324029.png)
 
 Spatial blocks (10 equal-count spatial blocks formed by Morton ordering)
 :::
@@ -196,7 +196,7 @@ Spatial blocks (10 equal-count spatial blocks formed by Morton ordering)
 
 ## Ensemble Results
 
-@fig-ensemble-chip shows a representative 2022 chip with the ensemble outputs. This includes the raw chip imagery, the ensemble mean probability for the target class, the ensemble variance, and the final argmax segmentation. Visually, it seems that high ensemble variance aligns with boundaries between eelgrass and non-eelgrass patches as well as ambiguous pixels, such as darker shadows or where features resemble eelgrass RGB. In the example chip, it can be clearly seen that the variance spikes at the boundary between eelgrass and non-eelgrass patches. These results suggest that the disagreement signal is capturing the genuinely difficult pixels in the imagery.
+@fig-ensemble-chip shows a representative 2022 chip with the ensemble outputs. This includes the raw chip imagery, the ensemble mean probability for the target class, the ensemble variance, and the final class segmentation. Visually, it seems that high ensemble variance aligns with boundaries between eelgrass and non-eelgrass patches as well as ambiguous pixels, such as darker shadows or where features resemble eelgrass RGB. In the example chip, it can be clearly seen that the variance spikes at the boundary between eelgrass and non-eelgrass patches. These results suggest that the disagreement signal is capturing the genuinely difficult pixels in the imagery.
 
 ::: {#fig-ensemble-chip layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-249597789.png)
@@ -204,7 +204,7 @@ Spatial blocks (10 equal-count spatial blocks formed by Morton ordering)
 Example ensemble inference outputs on a 2022 chip: Raw chip (+ point), ensemble mean probability, ensemble variance, and argmax segmentation.
 :::
 
-@tbl-ensemble-performance summarizes the pixel-wise performance of the ensemble and individual models on the 1,000 2022 points for comparison. The heterogeneous ensemble achieves an accuracy of 0.910 and an F-score of 0.886, outperforming all individual members, whose accuracies range from 0.840–0.890 and F-scores from 0.810–0.860. This aligns with previous literature on deep ensembles, which has reported higher accuracy and better-calibrated uncertainty compared to individual models. Another important note is that the precision (0.905) and recall (0.886) are relatively balanced for the deep ensemble.
+@tbl-ensemble-performance summarizes the pixel-wise performance of the ensemble and individual models on the 1,000 points from 2022 for comparison. The heterogeneous ensemble achieves an accuracy of 0.910 and an F-score of 0.886, outperforming all individual members, whose accuracies range from 0.840–0.890 and F-scores from 0.810–0.860. This aligns with previous literature on deep ensembles, which has reported higher accuracy and better-calibrated uncertainty compared to individual models. Another important note is that the precision (0.905) and recall (0.886) are relatively balanced for the deep ensemble.
 
 ```{r}
 #| label: tbl-ensemble-performance
@@ -240,7 +240,7 @@ ensemble_tbl |>
   knitr::kable(digits = 3)
 ```
 
-To assess how informative the uncertainty measure is, we created selective-accuracy curves on the 2021 in-distribution test set in @fig-selective-accuracy-2021. The graph plots 3 metrics: predictive entropy, mutual information, and ensemble variance. For all three metrics, selective accuracy increases sharply as we remove the most uncertain points and then plateaus at an accuracy of about 0.98 for all metrics. This confirms that each metric is meaningfully ordering the errors. The area under the selective accuracy curve (SAUC) is highest for entropy (0.9682) and then closely followed by variance (0.9619), suggesting entropy is the best for ordering the errors. However, as mentioned previously, since entropy is implicitly used in the vanilla conformal score and because variance can directly act as a proxy for epistemic uncertainty, growing under drift, variance is still chosen as the metric of choice.
+To assess how informative the uncertainty measure is, we created selective-accuracy curves on the 2021 in-distribution test set in @fig-selective-accuracy-2021. The graph plots 3 metrics: predictive entropy, mutual information, and ensemble variance. For all three metrics, selective accuracy increases sharply as we remove the most uncertain points and then plateaus at an accuracy of about 0.98 for all metrics. This confirms that each metric is meaningfully ordering the errors. The area under the selective accuracy curve (SAUC) is highest for entropy (0.9682) and then closely followed by variance (0.9619), suggesting entropy is the best for ordering the errors. However, as mentioned previously, since entropy is implicitly correlated with the vanilla conformal score and because variance can directly act as a proxy for epistemic uncertainty, growing under drift, we still suggest variance as the metric of choice for creating difficulty adaptive scores.
 
 ::: {#fig-selective-accuracy-2021 layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-3641659337.png)
@@ -283,13 +283,12 @@ colnames(id_lambda_tbl) <- c("Method", "q-hat",
 
 For the in-distribution evaluation for the linear scale, varying the $\lambda$ has a very minor effect on the set composition. The fraction of singletons remains almost unchanged (from 93.9 to 93.7) from $\lambda=0$ (vanilla) to $\lambda=4$ and with only a very slight increase in two-label sets (0.2). This stability can be explained by the high concentration of low-variance pixels in the in-distribution 2021 data. As shown in @tbl-variance-bins, 92.6% of the pixels of 2021 fall in the lowest variance bin $[0,0.1)$ and fewer than 1% above 0.3. Since almost all points have a small variance, the linear shrink factor $(1 + \lambda V)$ is relatively close to 1 for the entire test set. Thus, dividing by the $(1 + \lambda V)$ only mildly rescales the original scores without large changes to the ranking of the scores. Since the split CP depends on the score ordering and the threshold is recalibrated for each $\lambda$, the same label scores generally lie above or below the conformal threshold, resulting in almost identical set composition.
 
-The nonparametric normalizer does produce a slightly different set composition even in-distribution compared to the linear/vanilla scores. The nonparametric normalizer defines its correction parameter using (approximately) equal-size bins on the calibration set, as seen in @fig-score-vs-var. So even within the low variance bin \[0,0.1) there are different scale factors. In @fig-score-vs-var, we can see that there is a sharp incline of scale factor within this bin. Thus, the nonparametric method has a more heterogeneous rescaling in the small variance regions, which can slightly alter the score ranking, resulting in a slight change in set composition. While coverage remained at 0.9, a slightly different subset of label scores crossed the threshold, which thus changes the set prediction of the points.
-
 ```{r}
 #| label: tbl-variance-bins
 #| echo: false
 #| warning: false
 #| tbl-cap: 'Distribution of normalized ensemble variance across bins for 2021 (ID) and 2022 (OOD) evaluation points.'
+#| tbl-pos: H
 
 variance_bins_tbl <- data.frame(
   Bin = c("[0.0, 0.1)",
@@ -316,6 +315,16 @@ variance_bins_tbl |>
   ) |>
   add_header_above(c(" " = 1, "2021" = 2, "2022" = 2))
 ```
+
+The nonparametric normalizer does produce a slightly different set composition even in-distribution compared to the linear/vanilla scores. The nonparametric normalizer defines its correction parameter using (approximately) equal-size bins on the calibration set, as seen in @fig-score-vs-var. So even within the low variance bin \[0,0.1) there are different scale factors. In @fig-score-vs-var, we can see that there is a sharp incline of scale factor within this bin. Thus, the nonparametric method has a more heterogeneous rescaling in the small variance regions, which can slightly alter the score ranking, resulting in a slight change in set composition. While coverage remained at 0.9 in 2021, a slightly different subset of label scores crossed the nonconformity threshold, which thus changes the set prediction of the points.
+
+::: {#fig-score-vs-var layout-ncol="1" fig-pos="H"}
+![](images/clipboard-3649571017.png)
+
+Empirical mean nonconformity score (S) versus ensemble variance (V) on the 2021 calibration set, showing the nonparametric scale function.
+:::
+
+The main takeaway from the in-distribution results is that variance-aware normalization does not alter marginal coverage for exchangeable data, and as expected, the coverage holds for all methods, as guaranteed by conformal theory. Methods perform almost identically, and differences only become apparent once the exchangeability assumption is violated, which is examined in the following section.
 
 ## Temporal OOD (2022)
 
@@ -357,12 +366,14 @@ Overall coverage and singleton % on 2022 OOD points as a function of the linear 
 
 ### Nonparametric Normalization
 
-To better match the relationship between nonconformity scores and ensemble variance, as well as remove the need for parameter tuning, we estimated the nonparametric scale function $\hat a(V) \approx E[S|V]$ on the 2021 calibration set. @fig-score-vs-var shows the mean score as a function of variance. Average scores increase nonlinearly, increasing rapidly in low variance regions before leveling out. Scores were binned into equal-sized bins, and as seen in @tbl-variance-bins, a majority of points in the calibration set were low variance.
+To better match the relationship between nonconformity scores and ensemble variance, as well as remove the need for parameter tuning, we estimated the nonparametric scale function $\hat a(V) \approx E[S|V]$ on the 2021 calibration set. @fig-empirical-calibration-comparison shows the mean score as a function of variance as shown in @fig-score-vs-var, but with the addition of the empirical results from 2022 for comparison. Average scores increase nonlinearly, increasing rapidly in low variance regions before leveling out. Scores were binned into equal-sized bins, and as seen in @tbl-variance-bins, a majority of points in the calibration set were low variance. 
 
-::: {#fig-score-vs-var layout-ncol="1" fig-pos="H"}
-![](images/clipboard-1206416301.png)
+The estimated function is able to capture the shape of scores for 2022 shifted data quite well for low variance scores, and although the 2022 curve does deviate from the calibration-derived estimate for higher variance levels, the overall trend remains quite similar. The linear reference shows that the learned normalization is strongly non-linear and cannot be well-approximated with a global linear scaling.
 
-Empirical mean nonconformity score (S) versus ensemble variance (V) on the 2021 calibration set, showing the nonparametric scale function.
+::: {#fig-empirical-calibration-comparison layout-ncol="1" fig-pos="H"}
+![](images/clipboard-2626621009.png)
+
+Estimated normalization scale from 2021 calibration compareed to the empirical score-variance relationship observed in 2022. The extension shows extrapolation beyond calibration support.
 :::
 
 @tbl-ood-het provides a comparison of vanilla CP, the chosen “best” linear method at $\lambda=3$, and the nonparametric normalizer on 2022 points. While both adaptive methods retain target coverage on the test set, the nonparametric method resulted in a slightly higher coverage of 0.906, making it slightly more conservative at $\alpha=0.1$. The nonparametric method can do this while also yielding the most favorable set composition with the highest percentage of singletons at 96.4%.
