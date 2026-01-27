@@ -417,7 +417,7 @@ Coverage on 2022 OOD points as a function of ensemble-variance bins for vanilla,
 
 ## Class Conditional Coverage
 
-@tbl-class-cond-2022 reports the per-class coverage for the 2022 OOD points for the vanilla, linear $\lambda=3$, and nonparametric methods. All the methods achieved higher coverage on the background pixels than on eelgrass, reflecting a slight class imbalance. The linear normalization method improves coverage for both classes from vanilla and the nonparametric normalization sees further improvement. Additionally, the linear normalization method improves the disparity in coverage between background and eelgrass classes as it shrinks the percentage difference from 13.4% to 10.4%. The nonparametric method improves further, shrinking the gap to 9.9%. Variance-aware normalization reduces the disparity in the coverage between the two classes.
+@tbl-class-cond-2022 reports the per-class coverage for the 2022 OOD points for the vanilla, linear ($\lambda=3$), and nonparametric methods. All the methods achieved higher coverage on the background pixels than on eelgrass, reflecting a slight class imbalance. The linear normalization method improves coverage for both classes from vanilla and the nonparametric normalization sees further improvement. Additionally, the linear normalization method improves the disparity in coverage between background and eelgrass classes as it shrinks the percentage difference from 13.4% to 10.4%. The nonparametric method improves further, shrinking the gap to 9.9%. Variance-aware normalization reduces the disparity in the coverage between the two classes.
 
 ```{r}
 #| label: tbl-class-cond-2022
