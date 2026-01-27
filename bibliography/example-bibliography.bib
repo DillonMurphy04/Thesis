@@ -94,36 +94,40 @@ articleno = {1254},
 numpages = {12}
 }
 
-@article{lei2018,
-author = {Jing Lei and Max G’Sell and Alessandro Rinaldo and Ryan J. Tibshirani and Larry Wasserman},
-title = {Distribution-Free Predictive Inference for Regression},
-journal = {Journal of the American Statistical Association},
-volume = {113},
-number = {523},
-pages = {1094--1111},
-year = {2018},
-publisher = {ASA Website},
-doi = {10.1080/01621459.2017.1307116},
-URL = { 
-        https://doi.org/10.1080/01621459.2017.1307116
-},
-eprint = { 
-        https://doi.org/10.1080/01621459.2017.1307116
-}
+@inbook{romano,
+author = {Romano, Yaniv and Patterson, Evan and Cand\`{e}s, Emmanuel J.},
+title = {Conformalized quantile regression},
+year = {2019},
+publisher = {Curran Associates Inc.},
+address = {Red Hook, NY, USA},
+abstract = {Conformal prediction is a technique for constructing prediction intervals that attain valid coverage in finite samples, without making distributional assumptions. Despite this appeal, existing conformal methods can be unnecessarily conservative because they form intervals of constant or weakly varying length across the input space. In this paper we propose a new method that is fully adaptive to heteroscedasticity. It combines conformal prediction with classical quantile regression, inheriting the advantages of both. We establish a theoretical guarantee of valid coverage, supplemented by extensive experiments on popular regression datasets. We compare the efficiency of conformalized quantile regression to other conformal methods, showing that our method tends to produce shorter intervals.},
+booktitle = {Proceedings of the 33rd International Conference on Neural Information Processing Systems},
+articleno = {318},
+numpages = {11}
 }
 
-@article{
-chernozhukov2021,
-author = {Victor Chernozhukov  and Kaspar Wüthrich  and Yinchu Zhu },
-title = {Distributional conformal prediction},
-journal = {Proceedings of the National Academy of Sciences},
-volume = {118},
-number = {48},
-pages = {e2107794118},
+@inproceedings{gibbs,
+author = {Gibbs, Isaac and Cand\`{e}s, Emmanuel J.},
+title = {Adaptive conformal inference under distribution shift},
 year = {2021},
-doi = {10.1073/pnas.2107794118},
-URL = {https://www.pnas.org/doi/abs/10.1073/pnas.2107794118},
-eprint = {https://www.pnas.org/doi/pdf/10.1073/pnas.2107794118},
-abstract = {Prediction problems are important in many contexts. Examples include cross-sectional prediction, time series forecasting, counterfactual prediction and synthetic controls, and individual treatment effect prediction. We develop a prediction method that works in conjunction with many powerful classical methods (e.g., conventional quantile regression) as well as modern high-dimensional methods for estimating conditional distributions (e.g., quantile neural networks). Unlike many existing prediction approaches, our method is valid conditional on the observed predictors and efficient under some conditions. Importantly, our method is also robust; it exhibits unconditional coverage guarantees under model misspecification, under overfitting, and with time series data. We propose a robust method for constructing conditionally valid prediction intervals based on models for conditional distributions such as quantile and distribution regression. Our approach can be applied to important prediction problems, including cross-sectional prediction, k–step-ahead forecasts, synthetic controls and counterfactual prediction, and individual treatment effects prediction. Our method exploits the probability integral transform and relies on permuting estimated ranks. Unlike regression residuals, ranks are independent of the predictors, allowing us to construct conditionally valid prediction intervals under heteroskedasticity. We establish approximate conditional validity under consistent estimation and provide approximate unconditional validity under model misspecification, under overfitting, and with time series data. We also propose a simple “shape” adjustment of our baseline method that yields optimal prediction intervals.}}
+isbn = {9781713845393},
+publisher = {Curran Associates Inc.},
+address = {Red Hook, NY, USA},
+abstract = {We develop methods for forming prediction sets in an online setting where the data generating distribution is allowed to vary over time in an unknown fashion. Our framework builds on ideas from conformal inference to provide a general wrapper that can be combined with any black box method that produces point predictions of the unseen label or estimated quantiles of its distribution. While previous conformal inference methods rely on the assumption that the data points are exchangeable, our adaptive approach provably achieves the desired coverage frequency over long-time intervals irrespective of the true data generating process. We accomplish this by modelling the distribution shift as a learning problem in a single parameter whose optimal value is varying over time and must be continuously re-estimated. We test our method, adaptive conformal inference, on two real world datasets and find that its predictions are robust to visible and significant distribution shifts.},
+booktitle = {Proceedings of the 35th International Conference on Neural Information Processing Systems},
+articleno = {128},
+numpages = {13},
+series = {NIPS '21}
+}
 
-
+@inbook{Tibshirani,
+author = {Tibshirani, Ryan J. and Barber, Rina Foygel and Cand\`{e}s, Emmanuel J. and Ramdas, Aaditya},
+title = {Conformal prediction under covariate shift},
+year = {2019},
+publisher = {Curran Associates Inc.},
+address = {Red Hook, NY, USA},
+abstract = {We extend conformal prediction methodology beyond the case of exchangeable data. In particular, we show that a weighted version of conformal prediction can be used to compute distribution-free prediction intervals for problems in which the test and training covariate distributions differ, but the likelihood ratio between the two distributions is known—or, in practice, can be estimated accurately from a set of unlabeled data (test covariate points). Our weighted extension of conformal prediction also applies more broadly, to settings in which the data satisfies a certain weighted notion of exchangeability. We discuss other potential applications of our new conformal methodology, including latent variable and missing data problems.},
+booktitle = {Proceedings of the 33rd International Conference on Neural Information Processing Systems},
+articleno = {227},
+numpages = {11}
+}
