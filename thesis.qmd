@@ -49,10 +49,10 @@ Uncertainty quantification is a requirement for flagging ambiguous areas. To add
 
 To remedy this, it is necessary to make the conformal prediction adaptive to drift or local difficulty. First, work in adaptive or locally weighted CP in regression has shown that normalizing scores by a measure of local difficulty can make a single global quantile more appropriate across heterogeneous inputs, which improves approximate conditional behavior [@gibbs; @Tibshirani; @dewolf2025]. Second, research on uncertainty in deep learning has demonstrated that diversified deep ensembles provide practical, shift-aware signals of difficulty that tend to grow on out-of-distribution inputs [@lakshminarayanan2017]. Using these ideas, this study implements a simple strategy for rescaling the classification score by a calibration-learned difficulty proxy, so that the global threshold becomes conservative under drift, without the need for recalibration or labels.
 
-This thesis develops a rescaling design for eelgrass segmentation of multi-year drone imagery. The proposed normalizers are deliberately simple to adopt into existing pipelines. This includes: 
+This thesis develops a rescaling design for eelgrass segmentation of multi-year drone imagery. The proposed normalizers are deliberately simple to adopt into existing pipelines. This includes:
 
-1. a linear normalization $s'=(1-p_y)/(1+\lambda V)$ where $V$ summarizes ensemble disagreement and $\lambda$ controls degree of conservativeness 
-2. a learned normalizer $s'=s/\hat{a}(V)$ where $\hat{a}(V)=\text{E}[s|V]$ is estimated on the calibration split via quantile binning and interpolation. 
+1.  a linear normalization $s'=(1-p_y)/(1+\lambda V)$ where $V$ summarizes ensemble disagreement and $\lambda$ controls degree of conservativeness
+2.  a learned normalizer $s'=s/\hat{a}(V)$ where $\hat{a}(V)=\text{E}[s|V]$ is estimated on the calibration split via quantile binning and interpolation.
 
 The impact of these designs is evaluated in Chapter 4 (Results), demonstrating improved robustness to drift while retaining the standard CP workflow. Importantly, neither approach requires labels at test time or retraining.
 
@@ -62,7 +62,7 @@ Effective eelgrass monitoring requires models that both provide accurate predict
 
 ## Uncertainty in Deep Learning
 
-Uncertainty in predictive modeling is commonly broken up into two components: *epistemic* and *aleatoric*. These two components collectively comprise the total uncertainty in a model's predictions. Aleatoric uncertainty represents the noise inherent in observations, which is often impossible to remove, even with the addition of more data (e.g. sensor noise or true label ambiguity). Even a perfect model cannot remove it. Epistemic uncertainty represents the uncertainty of the model itself, which can be reduced with additional or higher-quality data [@kendall2017]. 
+Uncertainty in predictive modeling is commonly broken up into two components: *epistemic* and *aleatoric*. These two components collectively comprise the total uncertainty in a model's predictions. Aleatoric uncertainty represents the noise inherent in observations, which is often impossible to remove, even with the addition of more data (e.g. sensor noise or true label ambiguity). Even a perfect model cannot remove it. Epistemic uncertainty represents the uncertainty of the model itself, which can be reduced with additional or higher-quality data [@kendall2017].
 
 For modern vision models, raw probabilities are often miscalibrated, meaning the output confidence does not match empirical accuracy. This can be especially prevalent when the distribution of future data shifts, in which case models can be confident yet wrong. Post-hoc calibration, such as temperature scaling, rescales logits via $$\text{softmax}(z/T),$$ where $T>0$ is a temperature parameter learned on a validation set. This improves in-distribution calibration without changing accuracy [@guo2017]. Under shift, however, calibration is not enough, as the structure of the errors can change. Thus, it requires an uncertainty representation that integrates decision rules that signal the difficulty of the prediction.
 
@@ -140,18 +140,15 @@ At inference time, each of the models produces per-pixel log-odds, which are the
 
 We then compute the ensemble-averaged calibrated probability for class $y$ at pixel $x$, $$\hat{p}_y(x)= \frac{1}{K} \sum_{k=1}^K p_k(y| x; T).$$ The ensemble prediction is thus the aggregated probability. Each model’s individual probability output, $p_k(y| x; T)$, is also retained for computing the epistemic uncertainty proxy.
 
-For each labeled point x, we compute the epistemic variance proxy based on member disagreement for the true class, $$\hat{V}(x) = \widehat{Var}\{p_k(y_{true}| x; T))\}$$ To assess how the uncertainty proxy relates to errors, we use selective accuracy curves and correlation analyses. This was done with the variance scores (our epistemic proxy), as well as entropy (1) and mutual information (2) uncertainty scores for comparison: 
-$$
+For each labeled point x, we compute the epistemic variance proxy based on member disagreement for the true class, $$\hat{V}(x) = \widehat{Var}\{p_k(y_{true}| x; T))\}$$ To assess how the uncertainty proxy relates to errors, we use selective accuracy curves and correlation analyses. This was done with the variance scores (our epistemic proxy), as well as entropy (1) and mutual information (2) uncertainty scores for comparison: $$
 1. H(x)
 = - \sum_{y} \hat{p}_y(x)\,\log \hat{p}_y(x)
-$$
-$$
+$$ $$
 2. \mathrm{MI}(x)
 = H\!\left(\hat{p}(x)\right)
 - \frac{1}{K}\sum_{k=1}^K
 H\!\left(p_k(x)\right)
-$$
-However, these were not tested in conformalizing equations as they mix aleatoric and epistemic uncertainties and are implicitly correlated with the probability-based nonconformity scores $s_y$. To create a selective accuracy curve, take a given uncertainty score $u(x)$ and sort by decreasing $u(x)$. We then iteratively recompute accuracy scores on smaller and smaller subsets of higher confidence points. For an informative uncertainty metric (that ranks errors well), we should observe a monotonic increase in accuracy as the size of the subset decreases.
+$$ However, these were not tested in conformalizing equations as they mix aleatoric and epistemic uncertainties and are implicitly correlated with the probability-based nonconformity scores $s_y$. To create a selective accuracy curve, take a given uncertainty score $u(x)$ and sort by decreasing $u(x)$. We then iteratively recompute accuracy scores on smaller and smaller subsets of higher confidence points. For an informative uncertainty metric (that ranks errors well), we should observe a monotonic increase in accuracy as the size of the subset decreases.
 
 ## Split CP for Classification
 
@@ -164,18 +161,14 @@ As discussed in the background, split CP can under cover in difficult or OOD reg
 
 Let $V(x)$ denote the ensemble variance at pixel $x$. For each calibration point $x_i$, we observe a pair $(s_i,v_i)$. The general form of normalized scores can then be defined as $$S^\star =\frac{S}{g(V)},$$ where $g(\cdot)$ is a positive scaling function learned on the calibration set. Split CP is then applied to $S^\star s_i^\star = s_i/g(v_i), i \in C$, which yields a new threshold $\hat{q}_\alpha^\star$ and new prediction sets $$C_\alpha^\star(x)=\left\{\, y : s^\star(x,y) \le \hat{q}_\alpha^\star \,\right\}.$$
 
-Intuitively, where v(x) is large (ensemble model disagrees; model is uncertain), $g(v)$ is larger and thus $s^\star$ shrinks. This makes it more lenient in hard/OOD regions, reducing under-coverage. Two choices of $g$ were tested, a simple parametric linear variance scaler and a nonparametric normalization based on the relationship between $S$ and $V$. For both methods, we first rescale the ensemble variance $v(x)$ using the minimum and maximum values observed on the calibration set so that the resulting values lie approximately in $[0,1]$. Specifically, we define
-$$
+Intuitively, where v(x) is large (ensemble model disagrees; model is uncertain), $g(v)$ is larger and thus $s^\star$ shrinks. This makes it more lenient in hard/OOD regions, reducing under-coverage. Two choices of $g$ were tested, a simple parametric linear variance scaler and a nonparametric normalization based on the relationship between $S$ and $V$. For both methods, we first rescale the ensemble variance $v(x)$ using the minimum and maximum values observed on the calibration set so that the resulting values lie approximately in $[0,1]$. Specifically, we define $$
 \tilde v(x)
 = \frac{v(x) - v_{\min}}{v_{\max} - v_{\min}},
-$$
-where
-$$
+$$ where $$
 v_{\min} = \min_{i \in \mathcal{C}} v(x_i),
 \qquad
 v_{\max} = \max_{i \in \mathcal{C}} v(x_i).
 $$
-
 
 ### Parametric Linear Scaling
 
@@ -488,6 +481,8 @@ Per-block coverage for 2022 points for vanilla, linear $(\lambda=3)$, and nonpar
 Scatter plot of block-wise coverage vs mean variance for vanilla, linear $(\lambda=3)$, and nonparametric methods
 :::
 
+## Visual Method Comparison
+
 Finally, @fig-clipped-raster, @fig-spatial-sets, and @fig-changes show the actual raster and overlaid predictions. @fig-clipped-raster shows the 2022 raster as well as the ground truth points. As seen in the figure, the majority of eelgrass points are centered in the middle of the estuary imagery.
 
 ::: {#fig-clipped-raster layout-ncol="2" fig-pos="H"}
@@ -512,6 +507,14 @@ Set composition overlay for 2022 raster for vanilla, linear $(\lambda=3)$, and n
 ![](images/clipboard-1579065478.png)
 
 Set composition changes from vanilla for linear $(\lambda=3)$ and nonparametric methods
+:::
+
+@fig-chip-compare provides a localized view of how the three methods differ, zooming in on a single 448x448 px chip (same chip from @fig-ensemble-chip). It provides a good example of how variance normalization can change the predictions. At the labeled point, the ensemble mean predicts eelgrass with low confidence ($\hat p \approx 0.56$), yet the corresponding ensemble variance is also fairly low ($\hat v \approx 0.045$). This is a case where predictive uncertainty is relatively high (pixel is intrinsically ambigious, so we have high entropy/low confidence) but epistemic uncertainty is low (the ensemble members agree, resulting in low variance). As a result, both vanilla CP and linear variance-normalized method produce an empty set prediction at the labeled point. In contrast, the nonparametric method, retains eelgrass as the correct singleton set prediction. This shows an example of how the nonparametric function can better account for the typical score distribution at a certain variance level (in @fig-score-vs-var, expected score quickly rose for small variance and then stabilized). We can see these results even more clearly in the entire segmented chip, vanilla CP results in a large portion of empty sets in areas of ambiguity (borders between eelgrass and other as well as darker shadows). The linear method is able to shrink these ambiguous areas to singletons and two-set classes (as seen by the thinner strips between other and eelgrass) but still has a large portion of empty set predictions. Nonparametric is able to further shrink the area of ambiguity, while also producing almost no empty sets, instead providing more informative 2 class sets.
+
+::: {#fig-chip-compare layout-ncol="1" fig-pos="H"}
+![](images/clipboard-2987654623.png)
+
+Chip-level set prediction comparison on a representative 2022 point (GT = eelgrass). Both vanilla and linear methods return empty sets at that pixel, while the nonparametric method returns the correct singleton {eelgrass}.
 :::
 
 ## Sensitivity Analysis
