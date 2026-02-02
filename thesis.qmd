@@ -366,7 +366,7 @@ Overall coverage and singleton % on 2022 OOD points as a function of the linear 
 
 ### Nonparametric Normalization
 
-To better match the relationship between nonconformity scores and ensemble variance, as well as remove the need for parameter tuning, we estimated the nonparametric scale function $\hat a(V) \approx E[S|V]$ on the 2021 calibration set. @fig-empirical-calibration-comparison shows the mean score as a function of variance as shown in @fig-score-vs-var, but with the addition of the empirical results from 2022 for comparison. Average scores increase nonlinearly, increasing rapidly in low variance regions before leveling out. Scores were binned into equal-sized bins, and as seen in @tbl-variance-bins, a majority of points in the calibration set were low variance. 
+To better match the relationship between nonconformity scores and ensemble variance, as well as remove the need for parameter tuning, we estimated the nonparametric scale function $\hat a(V) \approx E[S|V]$ on the 2021 calibration set. @fig-empirical-calibration-comparison shows the mean score as a function of variance as shown in @fig-score-vs-var, but with the addition of the empirical results from 2022 for comparison. Average scores increase nonlinearly, increasing rapidly in low variance regions before leveling out. Scores were binned into equal-sized bins, and as seen in @tbl-variance-bins, a majority of points in the calibration set were low variance.
 
 The estimated function is able to capture the shape of scores for 2022 shifted data quite well for low variance scores, and although the 2022 curve does deviate from the calibration-derived estimate for higher variance levels, the overall trend remains quite similar. The linear reference shows that the learned normalization is strongly non-linear and cannot be well-approximated with a global linear scaling.
 
@@ -494,7 +494,7 @@ Scatter plot of block-wise coverage vs mean variance for vanilla, linear $(\lamb
 
 ## Visual Method Comparison
 
-Finally, @fig-clipped-raster, @fig-spatial-sets, and @fig-changes show the actual raster and overlaid predictions. @fig-clipped-raster shows the 2022 raster as well as the ground truth points. As seen in the figure, the majority of eelgrass points are centered in the middle of the estuary imagery.
+Finally, @fig-clipped-raster, @fig-spatial-sets, and @fig-transitions show the actual raster and overlaid predictions. @fig-clipped-raster shows the 2022 raster as well as the ground truth points. As seen in the figure, the majority of eelgrass points are centered in the middle of the estuary imagery.
 
 ::: {#fig-clipped-raster layout-ncol="2" fig-pos="H"}
 ![2022 Raster](images/clipboard-1704204551.png)
@@ -512,12 +512,14 @@ Visuals of the 2022 raster and overlayed ground truth points (Blue = Other, Gree
 Set composition overlay for 2022 raster for vanilla, linear $(\lambda=3)$, and nonparametric methods.
 :::
 
-@fig-changes provides a simplified view of @fig-spatial-sets by simply visualizing the sets that changed from vanilla to each variance-normalized method. The uncertain regions align between the two methods, as many of the two-set class changes occur in the same relative area. Interestingly, the non-parametric method creates more empty set classes from vanilla compared to linear, as the expected score over-normalizes these raw score values.
+@fig-transitions provides a simplified view of @fig-spatial-sets by simply visualizing how the conformal prediction set composition changes when moving from the vanilla method to each variance-normalized alternative. Points are categorized by the type of transition; teal squares indicate where predictions expand to two-label sets (from either empty sets or incorrect singletons), green circles indicate empty sets that became correct singletons, red circles indicate empty sets to incorrect singletons, and black points indicate any other type of transition (uncommon).
 
-::: {#fig-changes layout-ncol="1" fig-pos="H"}
-![](images/clipboard-1579065478.png)
+For both methods, many of the two-set class transitions occur in the same relative area, indicating both methods consistently identify similar high-difficulty areas of the estuary. Compared to the linear normalizer, the nonparametric method produces a larger number of empty-to-singleton transitions. Both methods have a similar increase in two-label predictions in areas where the vanilla method was overconfident and wrong.
 
-Set composition changes from vanilla for linear $(\lambda=3)$ and nonparametric methods
+::: {#fig-transitions  layout-ncol="1" fig-pos="H"}
+![](images/clipboard-1569499563.png)
+
+Set composition changes from vanilla for linear $(\lambda=3)$ and nonparametric methods. Counts for each transition type are reported in the legend.
 :::
 
 @fig-chip-compare provides a localized view of how the three methods differ, zooming in on a single 448x448 px chip (same chip from @fig-ensemble-chip). It provides a good example of how variance normalization can change the predictions. At the labeled point, the ensemble mean predicts eelgrass with low confidence ($\hat p \approx 0.56$), yet the corresponding ensemble variance is also fairly low ($\hat v \approx 0.045$). This is a case where predictive uncertainty is relatively high (pixel is intrinsically ambigious, so we have high entropy/low confidence) but epistemic uncertainty is low (the ensemble members agree, resulting in low variance). As a result, both vanilla CP and linear variance-normalized method produce an empty set prediction at the labeled point. In contrast, the nonparametric method, retains eelgrass as the correct singleton set prediction. This shows an example of how the nonparametric function can better account for the typical score distribution at a certain variance level (in @fig-score-vs-var, expected score quickly rose for small variance and then stabilized). We can see these results even more clearly in the entire segmented chip, vanilla CP results in a large portion of empty sets in areas of ambiguity (borders between eelgrass and other as well as darker shadows). The linear method is able to shrink these ambiguous areas to singletons and two-set classes (as seen by the thinner strips between other and eelgrass) but still has a large portion of empty set predictions. Nonparametric is able to further shrink the area of ambiguity, while also producing almost no empty sets, instead providing more informative 2 class sets.
