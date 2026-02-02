@@ -516,8 +516,8 @@ Set composition overlay for 2022 raster for vanilla, linear $(\lambda=3)$, and n
 
 For both methods, many of the two-set class transitions occur in the same relative area, indicating both methods consistently identify similar high-difficulty areas of the estuary. Compared to the linear normalizer, the nonparametric method produces a larger number of empty-to-singleton transitions. Both methods have a similar increase in two-label predictions in areas where the vanilla method was overconfident and wrong.
 
-::: {#fig-transitions  layout-ncol="1" fig-pos="H"}
-![](images/clipboard-1569499563.png)
+::: {#fig-transitions layout-ncol="1" fig-pos="H"}
+![](images/clipboard-2689703644.png)
 
 Set composition changes from vanilla for linear $(\lambda=3)$ and nonparametric methods. Counts for each transition type are reported in the legend.
 :::
