@@ -699,26 +699,9 @@ There are several limitations to be considered with the conclusion. First, confo
 
 # Computational Details
 
+All experiments and analyses were implemented in Python and executed in a Windows ArcGIS Pro Python environment. Deep-ensemble inference was run via arcgis.learn (loading Esri .emd models) and PyTorch, using an NVIDIA GPU. Geospatial inputs were handled using Rasterio, Fiona, Shapely, and PyProj; numerical computing and tables used NumPy and pandas; statistics utilities used SciPy and scikit-learn; figures were generated with Matplotlib (with tqdm for progress logging). Code to reproduce the computational workflow is available at [https://github.com/DillonMurphy04/eelgrass-cp](https://github.com/DillonMurphy04/eelgrass-cp). Package dependencies are listed in requirements.txt, and full documentation can be found in the repository README.
+
 # REFERENCES {.unnumbered}
 
 ::: {#refs}
 :::
-
-\appendix
-
-<!-- Store original definitions formatting -->
-
-\let\oldclearpage\clearpage
-\let\oldcleardoublepage\cleardoublepage
-
-<!-- Disable page breaks -->
-
-\let\clearpage\relax
-\let\cleardoublepage\relax
-
-# Super Cool Fancy Function
-
-<!-- Restore original formatting -->
-
-\let\clearpage\oldclearpage
-\let\cleardoublepage\oldcleardoublepage
