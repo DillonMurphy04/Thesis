@@ -866,7 +866,20 @@ Table&nbsp;4: Temporal OOD (2022) global coverage and set composition for Vanill
 </section>
 <section class="slide level2 center">
 
-<p><img data-src="images/clipboard-2540638404.png" style="max-height:85vh; width:auto; display:block; margin:0 auto;"></p>
+<div id="fig-cov-vs-var" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-cov-vs-var-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: flex-start;">
+<img data-src="images/clipboard-2540638404.png" style="max-height:85vh; width:auto; display:block; margin:0 auto;">
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cov-vs-var-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Coverage on 2022 OOD points as a function of ensemble-variance bins for vanilla, linear <span class="math inline">\((\lambda = 3)\)</span>, and nonparametric normalization.
+</figcaption>
+</figure>
+</div>
 <aside class="notes">
 <ul>
 <li>vanilla declines with variance -&gt; fails on harder points</li>
@@ -932,12 +945,10 @@ Table&nbsp;5: Per-class coverage on 2022 OOD points at <span class="math inline"
 </figure>
 </div>
 </div>
-</section>
-<section id="spatial" class="slide level2 center">
-<h2>Spatial</h2>
 <aside class="notes">
-<p>morton/z-ordering is a way of converting 2D spatial coordinates (x, y) into a single 1D index while preserving spatial locality.</p>
-<p>2D coordinates are transformed by taking the first bit of x, then the first bit of y, the second bit of x, and so on following a recursive Z pattern.</p>
+<ul>
+<li>harder class is eelgrass, normalization is able to slightly help the disparity between classes. Nonparametric more so than linear.</li>
+</ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -949,6 +960,260 @@ Table&nbsp;5: Per-class coverage on 2022 OOD points at <span class="math inline"
           overflow: hidden!important;
           display:block!important;
       }</style></aside>
+</section>
+<section id="spatial-robustness" class="slide level2 center">
+<h2>Spatial Robustness</h2>
+</section>
+<section class="slide level2 center">
+
+<div class="columns">
+<div class="column" style="width:50%;">
+<div id="fig-spatial" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-spatial-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="images/clipboard-429324029.png" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-spatial-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Spatial blocks (10 equal-count spatial blocks formed by Morton/Z-ordering)
+</figcaption>
+</figure>
+</div>
+</div><div class="column" style="width:50%;">
+<div id="fig-zorder" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-zorder-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="images/clipboard-3322764072.png" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-zorder-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Four iterations of the Z-order curve (from Wikipedia)
+</figcaption>
+</figure>
+</div>
+</div></div>
+<aside class="notes">
+<ul>
+<li>partition 1,000 points into 10 spatial blocks using Morton ordering, for evaluating local stability</li>
+<li>Morton (Z-order) indexing converts 2D spatial coordinates into a 1D ordering while preserving locality.</li>
+<li>It works by interleaving the binary bits of x and y coordinates, producing a recursive Z-shaped traversal pattern.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section class="slide level2 center">
+
+<div class="columns">
+<div class="column" style="width:40%;">
+<div id="tbl-spatial-diagnostics" class="cell quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-spatial-diagnostics-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6: Spatial robustness diagnostics on 2022 OOD points.
+</figcaption>
+<div aria-describedby="tbl-spatial-diagnostics-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="table cell caption-top" style="font-size: 20px; width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: center;" data-quarto-table-cell-role="th">Method</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">SD</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Correlation r</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Vanilla</td>
+<td style="text-align: center;">0.049</td>
+<td style="text-align: center;">-0.622</td>
+<td style="text-align: center;">0.055</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Linear (λ = 3.0)</td>
+<td style="text-align: center;">0.040</td>
+<td style="text-align: center;">-0.416</td>
+<td style="text-align: center;">0.231</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Nonparametric</td>
+<td style="text-align: center;">0.036</td>
+<td style="text-align: center;">-0.206</td>
+<td style="text-align: center;">0.569</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</div><div class="column" style="width:60%;">
+<div id="fig-cov-vs-var-spatial" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-cov-vs-var-spatial-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: flex-start;">
+<img data-src="images/clipboard-2465136862.png">
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cov-vs-var-spatial-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Scatter plot of block-wise coverage vs mean variance for vanilla, linear <span class="math inline">\((\lambda=3)\)</span>, and nonparametric methods
+</figcaption>
+</figure>
+</div>
+</div></div>
+<aside class="notes">
+<ul>
+<li>Vanilla: highest spatial variability + strongest negative variance/coverage correlation.</li>
+<li>Nonparametric: best equity (lowest SD) and weakest correlation.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section class="slide level2 center">
+
+<style>
+.reveal figcaption { font-size: 0.6em !important; }
+</style>
+<div id="fig-var-block" class="quarto-float quarto-figure quarto-figure-center" style="max-height:42vh; width:auto; display:block; margin:auto;">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-var-block-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="images/clipboard-1106994010.png" style="max-height:42vh; width:auto; display:block; margin:auto;">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-var-block-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Per-block mean variance for 2022 points
+</figcaption>
+</figure>
+</div>
+<div style="height:5vh;">
+
+</div>
+<div id="fig-cov-vs-block" class="quarto-float quarto-figure quarto-figure-center" style="max-height:42vh; width:auto; display:block; margin:auto;">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-cov-vs-block-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="images/clipboard-3485130909.png" style="max-height:42vh; width:auto; display:block; margin:auto;">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cov-vs-block-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Per-block coverage for 2022 points for vanilla, linear <span class="math inline">\((\lambda=3)\)</span>, and nonparametric methods
+</figcaption>
+</figure>
+</div>
+<aside class="notes">
+<ul>
+<li>In the above figure we can see the variance of each block. Blocks 2, 3, 5, 6, and 9 are all high variance blocks</li>
+<li>Below figure shows comparison of coverage on each block. Vanilla does very poorly for all high variance blocks except 9 which seems to be an outlier. Nonparametric seems to do best.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="visual-methed-comparison" class="slide level2 center">
+<h2>Visual Methed Comparison</h2>
+</section>
+<section class="slide level2 center">
+
+<div id="fig-clipped-raster" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-clipped-raster-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img data-src="images/clipboard-1704204551.png" style="max-height:85vh; width:auto; display:block; margin:0 auto;"></p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img data-src="images/clipboard-2841130883.png" style="max-height:85vh; width:auto; display:block; margin:0 auto;"></p>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-clipped-raster-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: Visuals of the 2022 raster and overlayed ground truth points (Blue = Other, Green = Eelgrass).
+</figcaption>
+</figure>
+</div>
+</section>
+<section class="slide level2 center">
+
+<div id="fig-spatial-sets" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-spatial-sets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: flex-start;">
+<img data-src="images/clipboard-2804289541.png" style="max-height:85vh; width:auto; display:block; margin:0 auto;">
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-spatial-sets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: Set composition overlay for 2022 raster for vanilla, linear <span class="math inline">\((\lambda=3)\)</span>, and nonparametric methods.
+</figcaption>
+</figure>
+</div>
+</section>
+<section class="slide level2 center">
+
+<div id="fig-transitions" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-transitions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: flex-start;">
+<img data-src="images/clipboard-2689703644.png" style="max-height:85vh; width:auto; display:block; margin:0 auto;">
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-transitions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12: Set composition changes from vanilla for linear <span class="math inline">\((\lambda=3)\)</span> and nonparametric methods. Counts for each transition type are reported in the legend.
+</figcaption>
+</figure>
+</div>
+</section>
+<section class="slide level2 center">
+
+<div id="fig-chip-compare" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-chip-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: flex-start;">
+<img data-src="images/clipboard-160940226.png" style="max-height:85vh; width:auto; display:block; margin:0 auto;">
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-chip-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13: Chip-level set prediction comparison on a representative 2022 point (GT = eelgrass). Both vanilla and linear methods return empty sets at that pixel, while the nonparametric method returns the correct singleton {eelgrass}.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="sensitivity-analysis" class="slide level2 center">
+<h2>Sensitivity Analysis</h2>
+</section>
+<section id="conclusion" class="slide level2 center">
+<h2>Conclusion</h2>
+</section>
+<section id="limitations" class="slide level2 center">
+<h2>Limitations</h2>
+</section>
+<section id="questions" class="slide level2 center">
+<h2>Questions?</h2>
 
 </section>
     </div>

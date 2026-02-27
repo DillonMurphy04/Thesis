@@ -184,29 +184,25 @@ $$ S'(x,y) = \frac{S(x,y)}{\hat a(V(x))}, \quad \hat a(V) \approx \mathbb{E}[S \
 -   Learn non-linear scaling a(v), no tuning parameter
 
 ::: notes
-Estimate $\hat a(V) \approx \mathbb{E}[S \mid V]$ on 2021 calibration:
-- quantile-bin variance (equal sized bins)
-- compute the average score for each variance bin
-- interpolate to define a continuous function
+Estimate $\hat a(V) \approx \mathbb{E}[S \mid V]$ on 2021 calibration: - quantile-bin variance (equal sized bins) - compute the average score for each variance bin - interpolate to define a continuous function
 :::
 
 ## Evaluation Metrics
 
 Primary:
 
-- Global coverage vs target $\alpha$
-- Set composition: % empty/singleton/two-label
+-   Global coverage vs target $\alpha$
+-   Set composition: % empty/singleton/two-label
 
 Additional:
 
-- class-conditional coverage
-- coverage vs variance bins
-- spatial robustness
+-   class-conditional coverage
+-   coverage vs variance bins
+-   spatial robustness
 
 ## Ensemble Results
 
-
------
+------------------------------------------------------------------------
 
 ::: {#fig-ensemble-chip layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-249597789.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
@@ -215,17 +211,10 @@ Example ensemble inference outputs on a 2022 chip: Raw chip (+ point), ensemble 
 :::
 
 ::: notes
-Here is a representative 2022 chip with the ensemble outputs. This includes
-the raw chip imagery, the ensemble mean probability for the target class, the ensemble
-variance, and the final class segmentation. Visually, it seems that high ensemble variance
-aligns with boundaries between eelgrass and non-eelgrass patches as well as ambiguous
-pixels, such as darker shadows or where features resemble eelgrass RGB. In the example
-chip, it can be clearly seen that the variance spikes at the boundary between eelgrass and
-non-eelgrass patches. These results suggest that the disagreement signal is capturing the
-genuinely difficult pixels in the imagery.
+Here is a representative 2022 chip with the ensemble outputs. This includes the raw chip imagery, the ensemble mean probability for the target class, the ensemble variance, and the final class segmentation. Visually, it seems that high ensemble variance aligns with boundaries between eelgrass and non-eelgrass patches as well as ambiguous pixels, such as darker shadows or where features resemble eelgrass RGB. In the example chip, it can be clearly seen that the variance spikes at the boundary between eelgrass and non-eelgrass patches. These results suggest that the disagreement signal is capturing the genuinely difficult pixels in the imagery.
 :::
 
-----
+------------------------------------------------------------------------
 
 ```{r}
 #| label: tbl-ensemble-performance
@@ -272,8 +261,7 @@ The heterogeneous ensemble achieves an accuracy of 0.910 and an F-score of 0.886
 
 ## In-Distribution Evaluation
 
-----
-
+------------------------------------------------------------------------
 
 ```{r}
 #| label: tbl-id-lambda
@@ -315,9 +303,9 @@ Main takeaway from in-distribution evaluation is that the normalization doesn't 
 
 ## Temporal OOD (2022)
 
-## Linear Normalization 
+## Linear Normalization
 
-----
+------------------------------------------------------------------------
 
 ```{r}
 #| label: tbl-ood-lambda
@@ -351,11 +339,11 @@ knitr::kable(digits = 3) |>
 ```
 
 ::: notes
-- Vanilla: 0.860 vs target 0.900 → strong undercoverage.
-- Increasing λ recovers coverage monotonically.
+-   Vanilla: 0.860 vs target 0.900 → strong undercoverage.
+-   Increasing λ recovers coverage monotonically.
 :::
 
-----
+------------------------------------------------------------------------
 
 ::: {#fig-cov-vs-lambda layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-130222262.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
@@ -364,13 +352,13 @@ Overall coverage and singleton % on 2022 OOD points as a function of the linear 
 :::
 
 ::: notes
-- Trade-off with set composition
-- $\lambda=3$ chosen as the best choice, as it is first value to retain target coverage (0.901) while still increasing singletons and only a modest increase in two-class sets.
+-   Trade-off with set composition
+-   $\lambda=3$ chosen as the best choice, as it is first value to retain target coverage (0.901) while still increasing singletons and only a modest increase in two-class sets.
 :::
 
 ## Nonparametric Normalization
 
----- 
+------------------------------------------------------------------------
 
 ::: {#fig-empirical-calibration-comparison layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-2626621009.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
@@ -379,12 +367,12 @@ Estimated normalization scale from 2021 calibration compared to the empirical sc
 :::
 
 ::: notes
-- steep rise in low-variance region: nonlinearity matters. 
-- The plot shows midpoint of equal sized bins, as seen there is a much higher proportion of low variance points in the ID data compared to OOD.
-- The estimated function captures the shape of the scores relatively well. Although there is some slight deviations as variance increases, the overall trend remains the same, and points to the estimated scale being conservative rather than undercovering.
+-   steep rise in low-variance region: nonlinearity matters.
+-   The plot shows midpoint of equal sized bins, as seen there is a much higher proportion of low variance points in the ID data compared to OOD.
+-   The estimated function captures the shape of the scores relatively well. Although there is some slight deviations as variance increases, the overall trend remains the same, and points to the estimated scale being conservative rather than undercovering.
 :::
 
-----
+------------------------------------------------------------------------
 
 ```{r}
 #| label: tbl-ood-het
@@ -420,21 +408,25 @@ knitr::kable(digits = 3) |>
 ```
 
 ::: notes
-- Nonparametric performs best overall even when compared to best $\lambda$. (highest singletons and higher coverage)
+-   Nonparametric performs best overall even when compared to best $\lambda$. (highest singletons and higher coverage)
 :::
 
-----
+------------------------------------------------------------------------
 
+::: {#fig-cov-vs-var layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-2540638404.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
 
+Coverage on 2022 OOD points as a function of ensemble-variance bins for vanilla, linear $(\lambda = 3)$, and nonparametric normalization.
+:::
+
 ::: notes
-- vanilla declines with variance -> fails on harder points
-- nonparametric is closest to flat near target, desired behavior (conditional-ish)
+-   vanilla declines with variance -\> fails on harder points
+-   nonparametric is closest to flat near target, desired behavior (conditional-ish)
 :::
 
 ## Class-conditional coverage (2022)
 
-----
+------------------------------------------------------------------------
 
 ```{r}
 #| label: tbl-class-cond-2022
@@ -464,9 +456,146 @@ knitr::kable(digits = 3) |>
 )
 ```
 
-## Spatial 
 ::: notes
-morton/z-ordering is a way of converting 2D spatial coordinates (x, y) into a single 1D index while preserving spatial locality.
-
-2D coordinates  are transformed by taking the first bit of x, then the first bit of y, the second bit of x, and so on following a recursive Z pattern.
+-   harder class is eelgrass, normalization is able to slightly help the disparity between classes. Nonparametric more so than linear.
 :::
+
+## Spatial Robustness
+
+----
+
+:::: {.columns}
+
+::: {.column width="50%"}
+::: {#fig-spatial}
+![](images/clipboard-429324029.png){width=100%}
+
+Spatial blocks (10 equal-count spatial blocks formed by Morton/Z-ordering)
+:::
+:::
+
+::: {.column width="50%"}
+::: {#fig-zorder}
+![](images/clipboard-3322764072.png){width=100%}
+
+Four iterations of the Z-order curve (from Wikipedia)
+:::
+:::
+
+::::
+
+::: notes
+- partition 1,000 points into 10 spatial blocks using Morton ordering, for evaluating local stability
+- Morton (Z-order) indexing converts 2D spatial coordinates into a 1D ordering while preserving locality.
+- It works by interleaving the binary bits of x and y coordinates, producing a recursive Z-shaped traversal pattern.
+:::
+
+----
+
+:::: {.columns}
+
+::: {.column width="40%"}
+```{r}
+#| label: tbl-spatial-diagnostics
+#| echo: false
+#| warning: false
+#| tbl-cap: "Spatial robustness diagnostics on 2022 OOD points."
+#| results: asis
+
+spatial_tbl <- data.frame(
+  Method               = c("Vanilla", "Linear (λ = 3.0)", "Nonparametric"),
+  BlockCoverageSD      = c(0.0494, 0.0401, 0.0357),
+  CorMeanVarCoverage_r = c(-0.622, -0.416, -0.206),
+  CorMeanVarCoverage_p = c(0.0546, 0.2314, 0.5689)
+)
+
+colnames(spatial_tbl) <- c("Method", "SD", "Correlation r", "p-value")
+
+spatial_tbl |>
+  knitr::kable(digits = 3, align = "c") |>
+  kable_styling(full_width = FALSE, font_size = 20)
+```
+:::
+
+::: {.column width="60%"}
+::: {#fig-cov-vs-var-spatial layout-ncol="1" fig-pos="H"}
+![](images/clipboard-2465136862.png)
+
+Scatter plot of block-wise coverage vs mean variance for vanilla, linear $(\lambda=3)$, and nonparametric methods
+:::
+:::
+::::
+
+::: notes
+- Vanilla: highest spatial variability + strongest negative variance/coverage correlation.
+- Nonparametric: best equity (lowest SD) and weakest correlation.
+:::
+
+-----
+
+<style>
+.reveal figcaption { font-size: 0.6em !important; }
+</style>
+
+::: {#fig-var-block}
+![](images/clipboard-1106994010.png){style="max-height:42vh; width:auto; display:block; margin:auto;"}
+
+Per-block mean variance for 2022 points
+:::
+
+<div style="height:5vh;"></div>
+
+::: {#fig-cov-vs-block}
+![](images/clipboard-3485130909.png){style="max-height:42vh; width:auto; display:block; margin:auto;"}
+
+Per-block coverage for 2022 points for vanilla, linear $(\lambda=3)$, and nonparametric methods
+:::
+
+::: notes
+- In the above figure we can see the variance of each block. Blocks 2, 3, 5, 6, and 9 are all high variance blocks
+- Below figure shows comparison of coverage on each block. Vanilla does very poorly for all high variance blocks except 9 which seems to be an outlier. Nonparametric seems to do best.
+:::
+
+## Visual Methed Comparison
+
+----
+
+::: {#fig-clipped-raster layout-ncol="2" fig-pos="H"}
+![](images/clipboard-1704204551.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
+
+![](images/clipboard-2841130883.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
+
+Visuals of the 2022 raster and overlayed ground truth points (Blue = Other, Green = Eelgrass).
+:::
+
+----
+
+::: {#fig-spatial-sets layout-ncol="1" fig-pos="H"}
+![](images/clipboard-2804289541.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
+
+Set composition overlay for 2022 raster for vanilla, linear $(\lambda=3)$, and nonparametric methods.
+:::
+
+----- 
+
+::: {#fig-transitions layout-ncol="1" fig-pos="H"}
+![](images/clipboard-2689703644.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
+
+Set composition changes from vanilla for linear $(\lambda=3)$ and nonparametric methods. Counts for each transition type are reported in the legend.
+:::
+
+----- 
+
+::: {#fig-chip-compare layout-ncol="1" fig-pos="H"}
+![](images/clipboard-160940226.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
+
+Chip-level set prediction comparison on a representative 2022 point (GT = eelgrass). Both vanilla and linear methods return empty sets at that pixel, while the nonparametric method returns the correct singleton {eelgrass}.
+:::
+
+## Sensitivity Analysis
+
+## Conclusion
+
+## Limitations
+
+## Questions?
