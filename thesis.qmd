@@ -159,7 +159,7 @@ The ensemble model is treated as a single probabilistic classifier for conformal
 
 As discussed in the background, split CP can under cover in difficult or OOD regions since the score distribution will be larger where the classifier is less reliable. We address this by normalizing by the difficulty proxy, ensemble variance.
 
-Let $V(x)$ denote the ensemble variance at pixel $x$. For each calibration point $x_i$, we observe a pair $(s_i,v_i)$. The general form of normalized scores can then be defined as $$S^\star =\frac{S}{g(V)},$$ where $g(\cdot)$ is a positive scaling function learned on the calibration set. Split CP is then applied to $S^\star s_i^\star = s_i/g(v_i), i \in C$, which yields a new threshold $\hat{q}_\alpha^\star$ and new prediction sets $$C_\alpha^\star(x)=\left\{\, y : s^\star(x,y) \le \hat{q}_\alpha^\star \,\right\}.$$
+Let $V(x)$ denote the ensemble variance at pixel $x$. For each calibration point $x_i$, we observe a pair $(s_i,v_i)$. The general form of normalized scores can then be defined as $$S^\star =\frac{S}{g(V)},$$ where $g(\cdot)$ is a positive scaling function learned on the calibration set. Split CP is then applied to $s_i^\star = s_i/g(v_i), i \in C$, which yields a new threshold $\hat{q}_\alpha^\star$ and new prediction sets $$C_\alpha^\star(x)=\left\{\, y : s^\star(x,y) \le \hat{q}_\alpha^\star \,\right\}.$$
 
 Intuitively, where v(x) is large (ensemble model disagrees; model is uncertain), $g(v)$ is larger and thus $s^\star$ shrinks. This makes it more lenient in hard/OOD regions, reducing under-coverage. Two choices of $g$ were tested, a simple parametric linear variance scaler and a nonparametric normalization based on the relationship between $S$ and $V$. For both methods, we first rescale the ensemble variance $v(x)$ using the minimum and maximum values observed on the calibration set so that the resulting values lie approximately in $[0,1]$. Specifically, we define $$
 \tilde v(x)
@@ -373,7 +373,7 @@ The estimated function is able to capture the shape of scores for 2022 shifted d
 ::: {#fig-empirical-calibration-comparison layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-2626621009.png)
 
-Estimated normalization scale from 2021 calibration compareed to the empirical score-variance relationship observed in 2022. The extension shows extrapolation beyond calibration support.
+Estimated normalization scale from 2021 calibration compared to the empirical score-variance relationship observed in 2022. The extension shows extrapolation beyond calibration support.
 :::
 
 @tbl-ood-het provides a comparison of vanilla CP, the chosen “best” linear method at $\lambda=3$, and the nonparametric normalizer on 2022 points. While both adaptive methods retain target coverage on the test set, the nonparametric method resulted in a slightly higher coverage of 0.906, making it slightly more conservative at $\alpha=0.1$. The nonparametric method can do this while also yielding the most favorable set composition with the highest percentage of singletons at 96.4%.
