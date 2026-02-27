@@ -1129,8 +1129,8 @@ Figure&nbsp;9: Per-block coverage for 2022 points for vanilla, linear <span clas
           display:block!important;
       }</style></aside>
 </section>
-<section id="visual-methed-comparison" class="slide level2 center">
-<h2>Visual Methed Comparison</h2>
+<section id="visual-method-comparison" class="slide level2 center">
+<h2>Visual Method Comparison</h2>
 </section>
 <section class="slide level2 center">
 
@@ -1151,6 +1151,19 @@ Figure&nbsp;10: Visuals of the 2022 raster and overlayed ground truth points (Bl
 </figcaption>
 </figure>
 </div>
+<aside class="notes">
+<p>These images provide a general understanding of the data. On the left we can see the entire Morro Bay raster, and on the right the overlayed labeled points. As seen, majority of eelgrass is centered in the middle of the estuary.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
 <section class="slide level2 center">
 
@@ -1168,6 +1181,19 @@ Figure&nbsp;11: Set composition overlay for 2022 raster for vanilla, linear <spa
 </figcaption>
 </figure>
 </div>
+<aside class="notes">
+<p>Figure 11 displays the set composition of each method. As seen in the image, there appears to be a high uncertainty region towards the top end of the estuary. For this region, the vanilla CP method reported a majority of incorrect singletons or empty sets, while the normalized methods converted many of these into two-class sets.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
 <section class="slide level2 center">
 
@@ -1185,6 +1211,20 @@ Figure&nbsp;12: Set composition changes from vanilla for linear <span class="mat
 </figcaption>
 </figure>
 </div>
+<aside class="notes">
+<p>Here is a slightly simplified view, which just shows the set composition changes from vanilla to normalized methods.</p>
+<p>For both, many of the two-set class transitions occur in the same relative area, indicating both methods identify similar high-difficulty areas of the estuary where the vanilla method was confident and wrong. Compared to the linear normalizer, the nonparametric method produces a larger number of empty-to-singleton transitions</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
 <section class="slide level2 center">
 
@@ -1202,15 +1242,217 @@ Figure&nbsp;13: Chip-level set prediction comparison on a representative 2022 po
 </figcaption>
 </figure>
 </div>
+<aside class="notes">
+<p>This figure provides an interesting example of how variance normalization can change the predictions. At the labeled point, the ensemble mean predicts eelgrass with low confidence (<span class="math inline">\(\hat p \approx 0.56\)</span>), yet the corresponding ensemble variance is also fairly low (<span class="math inline">\(\hat v \approx 0.045\)</span>). This is a case where predictive uncertainty is relatively high (pixel is intrinsically ambigious, so we have high entropy/low confidence) but epistemic uncertainty is low (the ensemble members agree, resulting in low variance). As a result, both vanilla CP and linear variance-normalized method produce an empty set prediction at the labeled point. In contrast, the nonparametric method, retains eelgrass as the correct singleton set prediction.</p>
+<p>We can see these results even more clearly in the entire segmented chip, vanilla CP results in a large portion of empty sets in areas of ambiguity (borders between eelgrass and other as well as darker shadows). The linear method is able to shrink these ambiguous areas to singletons and two-set classes (as seen by the thinner strips between other and eelgrass) but still has a large portion of empty set predictions. Nonparametric is able to further shrink the area of ambiguity, while also producing almost no empty sets, instead providing more informative 2 class sets.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
 <section id="sensitivity-analysis" class="slide level2 center">
 <h2>Sensitivity Analysis</h2>
 </section>
-<section id="conclusion" class="slide level2 center">
-<h2>Conclusion</h2>
+<section class="slide level2 center">
+
+<div class="cell">
+<div id="tbl-ablation-2022" class="cell quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ablation-2022-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7: Coverage and set composition on 2022 OOD points across <span class="math inline">\(\alpha \in {0.10, 0.05, 0.025}\)</span>.
+</figcaption>
+<div aria-describedby="tbl-ablation-2022-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="table do-not-create-environment cell caption-top" style="font-size: 20px; width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Method</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Coverage</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Empty (%)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Single (%)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Two-label (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd" data-grouplength="3">
+<td colspan="5" style="border-bottom: 1px solid"><strong>α = 0.025</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Linear (λ=3)</td>
+<td style="text-align: right;">0.967</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">70.8</td>
+<td style="text-align: right;">29.2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Nonparametric</td>
+<td style="text-align: right;">0.972</td>
+<td style="text-align: right;">0.3</td>
+<td style="text-align: right;">65.4</td>
+<td style="text-align: right;">34.3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Vanilla</td>
+<td style="text-align: right;">0.949</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">87.2</td>
+<td style="text-align: right;">12.8</td>
+</tr>
+<tr class="odd" data-grouplength="3">
+<td colspan="5" style="border-bottom: 1px solid"><strong>α = 0.05</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Linear (λ=3)</td>
+<td style="text-align: right;">0.952</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">80.5</td>
+<td style="text-align: right;">19.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Nonparametric</td>
+<td style="text-align: right;">0.944</td>
+<td style="text-align: right;">0.4</td>
+<td style="text-align: right;">87.0</td>
+<td style="text-align: right;">12.6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Vanilla</td>
+<td style="text-align: right;">0.919</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">95.9</td>
+<td style="text-align: right;">4.1</td>
+</tr>
+<tr class="odd" data-grouplength="3">
+<td colspan="5" style="border-bottom: 1px solid"><strong>α = 0.1</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Linear (λ=3)</td>
+<td style="text-align: right;">0.901</td>
+<td style="text-align: right;">2.5</td>
+<td style="text-align: right;">93.8</td>
+<td style="text-align: right;">3.7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Nonparametric</td>
+<td style="text-align: right;">0.906</td>
+<td style="text-align: right;">0.8</td>
+<td style="text-align: right;">96.4</td>
+<td style="text-align: right;">2.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Vanilla</td>
+<td style="text-align: right;">0.860</td>
+<td style="text-align: right;">7.3</td>
+<td style="text-align: right;">92.7</td>
+<td style="text-align: right;">0.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<aside class="notes">
+<ul>
+<li>Main trend persists across all alpha levels, vanilla undercovers, normalization recovers the lost coverage to at or near target levels.</li>
+<li>At very low <span class="math inline">\(\alpha\)</span> tradeoffs are more pronounce, as we see a laerge increase in two-class sets, intuitively makes sense if we are trying to ensure such high confidence.</li>
+<li>Continue to graphs for a more intuitive visual comparison</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section class="slide level2 center">
+
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ablation-coverage-2022" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-ablation-coverage-2022-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="Murphy_ThesisPresentation_files/figure-revealjs/fig-ablation-coverage-2022-1.png" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ablation-coverage-2022-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14: Coverage across <span class="math inline">\(\alpha \in \{0.1, 0.05, 0.025\}\)</span>. Dashed line shows the target coverage 1 - α.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ablation-setcomp-2022" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-ablation-setcomp-2022-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="Murphy_ThesisPresentation_files/figure-revealjs/fig-ablation-setcomp-2022-1.png" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ablation-setcomp-2022-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15: Set composition (empty, single, two-label) across <span class="math inline">\(\alpha \in \{0.1, 0.05, 0.025\}\)</span>.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+<aside class="notes">
+<ul>
+<li>Method are not providing overly conservative estimates.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="takeaways" class="slide level2 center">
+<h2>Takeaways</h2>
+<ol type="1">
+<li>Ensemble improves accuracy and provides useful uncertainty</li>
+<li>ID: all conformal methods meet target coverage</li>
+<li>OOD (2022): vanilla CP undercovers, ensemble variance normalization recovers lost coverage</li>
+<li>Improved coverage vs variance and improved spatial equity</li>
+<li>Nonparametric seemed to work best and requires no parameter tuning.</li>
+</ol>
 </section>
 <section id="limitations" class="slide level2 center">
 <h2>Limitations</h2>
+<ul>
+<li>Formal CP guarantees require exchangeability. This only target empircal robustness.</li>
+<li>Assumes score–variance relationship transfers across years (may fail under larger shifts)</li>
+<li>2022 uses point labels (not full dense raster labels)</li>
+<li>Ensembles add compute cost</li>
+</ul>
+</section>
+<section id="conclusion" class="slide level2 center">
+<h2>Conclusion</h2>
+<ul>
+<li>Ensemble disagreement provides a practical way to make conformal prediction sets more reliable under slight shift for eelgrass segmentation.</li>
+<li>Works as a post-hoc wrapper: no retraining, no test-time labels</li>
+</ul>
 </section>
 <section id="questions" class="slide level2 center">
 <h2>Questions?</h2>

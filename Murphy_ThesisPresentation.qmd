@@ -462,38 +462,35 @@ knitr::kable(digits = 3) |>
 
 ## Spatial Robustness
 
-----
+------------------------------------------------------------------------
 
-:::: {.columns}
-
-::: {.column width="50%"}
+::::::: columns
+:::: {.column width="50%"}
 ::: {#fig-spatial}
-![](images/clipboard-429324029.png){width=100%}
+![](images/clipboard-429324029.png){width="100%"}
 
 Spatial blocks (10 equal-count spatial blocks formed by Morton/Z-ordering)
 :::
-:::
+::::
 
-::: {.column width="50%"}
+:::: {.column width="50%"}
 ::: {#fig-zorder}
-![](images/clipboard-3322764072.png){width=100%}
+![](images/clipboard-3322764072.png){width="100%"}
 
 Four iterations of the Z-order curve (from Wikipedia)
 :::
-:::
-
 ::::
+:::::::
 
 ::: notes
-- partition 1,000 points into 10 spatial blocks using Morton ordering, for evaluating local stability
-- Morton (Z-order) indexing converts 2D spatial coordinates into a 1D ordering while preserving locality.
-- It works by interleaving the binary bits of x and y coordinates, producing a recursive Z-shaped traversal pattern.
+-   partition 1,000 points into 10 spatial blocks using Morton ordering, for evaluating local stability
+-   Morton (Z-order) indexing converts 2D spatial coordinates into a 1D ordering while preserving locality.
+-   It works by interleaving the binary bits of x and y coordinates, producing a recursive Z-shaped traversal pattern.
 :::
 
-----
+------------------------------------------------------------------------
 
-:::: {.columns}
-
+:::::: columns
 ::: {.column width="40%"}
 ```{r}
 #| label: tbl-spatial-diagnostics
@@ -517,25 +514,27 @@ spatial_tbl |>
 ```
 :::
 
-::: {.column width="60%"}
+:::: {.column width="60%"}
 ::: {#fig-cov-vs-var-spatial layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-2465136862.png)
 
 Scatter plot of block-wise coverage vs mean variance for vanilla, linear $(\lambda=3)$, and nonparametric methods
 :::
-:::
 ::::
+::::::
 
 ::: notes
-- Vanilla: highest spatial variability + strongest negative variance/coverage correlation.
-- Nonparametric: best equity (lowest SD) and weakest correlation.
+-   Vanilla: highest spatial variability + strongest negative variance/coverage correlation.
+-   Nonparametric: best equity (lowest SD) and weakest correlation.
 :::
 
------
+------------------------------------------------------------------------
 
+```{=html}
 <style>
 .reveal figcaption { font-size: 0.6em !important; }
 </style>
+```
 
 ::: {#fig-var-block}
 ![](images/clipboard-1106994010.png){style="max-height:42vh; width:auto; display:block; margin:auto;"}
@@ -543,7 +542,8 @@ Scatter plot of block-wise coverage vs mean variance for vanilla, linear $(\lamb
 Per-block mean variance for 2022 points
 :::
 
-<div style="height:5vh;"></div>
+::: {style="height:5vh;"}
+:::
 
 ::: {#fig-cov-vs-block}
 ![](images/clipboard-3485130909.png){style="max-height:42vh; width:auto; display:block; margin:auto;"}
@@ -552,13 +552,13 @@ Per-block coverage for 2022 points for vanilla, linear $(\lambda=3)$, and nonpar
 :::
 
 ::: notes
-- In the above figure we can see the variance of each block. Blocks 2, 3, 5, 6, and 9 are all high variance blocks
-- Below figure shows comparison of coverage on each block. Vanilla does very poorly for all high variance blocks except 9 which seems to be an outlier. Nonparametric seems to do best.
+-   In the above figure we can see the variance of each block. Blocks 2, 3, 5, 6, and 9 are all high variance blocks
+-   Below figure shows comparison of coverage on each block. Vanilla does very poorly for all high variance blocks except 9 which seems to be an outlier. Nonparametric seems to do best.
 :::
 
-## Visual Methed Comparison
+## Visual Method Comparison
 
-----
+------------------------------------------------------------------------
 
 ::: {#fig-clipped-raster layout-ncol="2" fig-pos="H"}
 ![](images/clipboard-1704204551.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
@@ -568,7 +568,11 @@ Per-block coverage for 2022 points for vanilla, linear $(\lambda=3)$, and nonpar
 Visuals of the 2022 raster and overlayed ground truth points (Blue = Other, Green = Eelgrass).
 :::
 
-----
+::: notes
+These images provide a general understanding of the data. On the left we can see the entire Morro Bay raster, and on the right the overlayed labeled points. As seen, majority of eelgrass is centered in the middle of the estuary.
+:::
+
+------------------------------------------------------------------------
 
 ::: {#fig-spatial-sets layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-2804289541.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
@@ -576,7 +580,11 @@ Visuals of the 2022 raster and overlayed ground truth points (Blue = Other, Gree
 Set composition overlay for 2022 raster for vanilla, linear $(\lambda=3)$, and nonparametric methods.
 :::
 
------ 
+::: notes
+Figure 11 displays the set composition of each method. As seen in the image, there appears to be a high uncertainty region towards the top end of the estuary. For this region, the vanilla CP method reported a majority of incorrect singletons or empty sets, while the normalized methods converted many of these into two-class sets.
+:::
+
+------------------------------------------------------------------------
 
 ::: {#fig-transitions layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-2689703644.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
@@ -584,7 +592,13 @@ Set composition overlay for 2022 raster for vanilla, linear $(\lambda=3)$, and n
 Set composition changes from vanilla for linear $(\lambda=3)$ and nonparametric methods. Counts for each transition type are reported in the legend.
 :::
 
------ 
+::: notes
+Here is a slightly simplified view, which just shows the set composition changes from vanilla to normalized methods.
+
+For both, many of the two-set class transitions occur in the same relative area, indicating both methods identify similar high-difficulty areas of the estuary where the vanilla method was confident and wrong. Compared to the linear normalizer, the nonparametric method produces a larger number of empty-to-singleton transitions
+:::
+
+------------------------------------------------------------------------
 
 ::: {#fig-chip-compare layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-160940226.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
@@ -592,10 +606,209 @@ Set composition changes from vanilla for linear $(\lambda=3)$ and nonparametric 
 Chip-level set prediction comparison on a representative 2022 point (GT = eelgrass). Both vanilla and linear methods return empty sets at that pixel, while the nonparametric method returns the correct singleton {eelgrass}.
 :::
 
+::: notes
+This figure provides an interesting example of how variance normalization can change the predictions. At the labeled point, the ensemble mean predicts eelgrass with low confidence ($\hat p \approx 0.56$), yet the corresponding ensemble variance is also fairly low ($\hat v \approx 0.045$). This is a case where predictive uncertainty is relatively high (pixel is intrinsically ambigious, so we have high entropy/low confidence) but epistemic uncertainty is low (the ensemble members agree, resulting in low variance). As a result, both vanilla CP and linear variance-normalized method produce an empty set prediction at the labeled point. In contrast, the nonparametric method, retains eelgrass as the correct singleton set prediction.
+
+We can see these results even more clearly in the entire segmented chip, vanilla CP results in a large portion of empty sets in areas of ambiguity (borders between eelgrass and other as well as darker shadows). The linear method is able to shrink these ambiguous areas to singletons and two-set classes (as seen by the thinner strips between other and eelgrass) but still has a large portion of empty set predictions. Nonparametric is able to further shrink the area of ambiguity, while also producing almost no empty sets, instead providing more informative 2 class sets.
+:::
+
 ## Sensitivity Analysis
+
+------------------------------------------------------------------------
+
+```{r}
+#| label: tbl-ablation-2022
+#| echo: false
+#| warning: false
+#| message: false
+#| tbl-cap: 'Coverage and set composition on 2022 OOD points across $\alpha \in \{0.10, 0.05, 0.025\}$.'
+
+ablation_2022_tbl <- ablation_summary |>
+  filter(domain == "2022_OOD") |>
+  arrange(alpha, method) |>
+  transmute(
+    alpha,
+    Method    = method,
+    Coverage  = coverage_overall,
+    Empty     = 100 * pct_empty,
+    Single    = 100 * pct_single,
+    Two_label = 100 * pct_two
+  )
+
+# row ranges for each alpha group
+group_info <- ablation_2022_tbl |>
+  mutate(row_id = row_number()) |>
+  group_by(alpha) |>
+  summarise(
+    start = min(row_id),
+    end   = max(row_id),
+    .groups = "drop"
+  )
+
+# table body without the alpha column
+tbl_body <- ablation_2022_tbl |>
+  select(-alpha)
+
+tab <- tbl_body |>
+  knitr::kable(
+    digits = c(3, 3, 1, 1, 1),
+    col.names = c(
+      "Method",
+      "Coverage",
+      "Empty (%)",
+      "Single (%)",
+      "Two-label (%)"
+    ),
+    booktabs = TRUE
+  ) |>
+  kable_styling(full_width = FALSE, font_size = 20)
+
+# add “Alpha = ...” subsections
+for (i in seq_len(nrow(group_info))) {
+  tab <- tab |>
+    group_rows(
+      paste0("α = ", group_info$alpha[i]),
+      group_info$start[i],
+      group_info$end[i]
+    )
+}
+
+tab
+```
+
+::: notes
+-   Main trend persists across all alpha levels, vanilla undercovers, normalization recovers the lost coverage to at or near target levels.
+-   At very low $\alpha$ tradeoffs are more pronounce, as we see a laerge increase in two-class sets, intuitively makes sense if we are trying to ensure such high confidence.
+-   Continue to graphs for a more intuitive visual comparison
+:::
+
+------------------------------------------------------------------------
+
+::::: columns
+::: {.column width="50%"}
+```{r}
+#| label: fig-ablation-coverage-2022
+#| echo: false
+#| warning: false
+#| out-width: "100%"
+#| fig-width: 9
+#| fig-height: 6
+#| fig-cap: 'Coverage across $\alpha \in \{0.1, 0.05, 0.025\}$. Dashed line shows the target coverage 1 - α.'
+
+ablation_2022 <- ablation_summary |>
+  filter(domain == "2022_OOD")
+
+gg_coverage <- ggplot(
+  ablation_2022,
+  aes(x = factor(alpha),
+      y = coverage_overall,
+      color = method,
+      group = method)
+) +
+  geom_point(size = 2) +
+  geom_line() +
+  # target line(s): 1 - alpha
+  geom_hline(
+    data = distinct(ablation_2022, alpha, target_cov),
+    aes(yintercept = target_cov),
+    linetype = "dashed",
+    color   = "grey40"
+  ) +
+  labs(
+    x = expression(alpha),
+    y = "Coverage",
+    color = "Method"
+  ) +
+  coord_cartesian(ylim = c(0.85, 1)) +
+  theme_minimal(base_size = 20) +
+  theme(
+    legend.position = "top"
+  )
+
+gg_coverage
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| label: fig-ablation-setcomp-2022
+#| echo: false
+#| warning: false
+#| out-width: "100%"
+#| fig-width: 9
+#| fig-height: 6
+#| fig-cap: 'Set composition (empty, single, two-label) across $\alpha \in \{0.1, 0.05, 0.025\}$.'
+
+setcomp_2022 <- ablation_summary |>
+  filter(domain == "2022_OOD") |>
+  select(method, alpha, pct_empty, pct_single, pct_two) |>
+  pivot_longer(
+    cols = starts_with("pct_"),
+    names_to = "SetType",
+    values_to = "Pct"
+  ) |>
+  mutate(
+    SetType = recode(
+      SetType,
+      pct_empty  = "Empty",
+      pct_single = "Single",
+      pct_two    = "Two-label"
+    ),
+    Pct   = 100 * Pct,
+    alpha = factor(alpha)   # keep alphas ordered but treat as factor for faceting
+  )
+
+gg_setcomp <- ggplot(
+  setcomp_2022,
+  aes(x = method, y = Pct, fill = SetType)
+) +
+  geom_col(position = "stack") +
+  facet_wrap(
+    ~ alpha,
+    nrow = 1,
+    labeller = labeller(alpha = function(x) paste0("alpha = ", x))
+  ) +
+  labs(
+    x = "",
+    y = "Set composition (%)",
+    fill = "Set type"
+  ) +
+  theme_minimal(base_size = 20) +
+  theme(
+    axis.text.x = element_text(angle = 25, hjust = 0.75),
+    strip.text  = element_text(size = 9)
+  )+
+  theme(
+    legend.position = "top"
+  )
+
+gg_setcomp
+```
+:::
+:::::
+
+::: notes
+- Method are not providing overly conservative estimates.
+:::
+
+## Takeaways
+
+1.  Ensemble improves accuracy and provides useful uncertainty
+2.  ID: all conformal methods meet target coverage
+3.  OOD (2022): vanilla CP undercovers, ensemble variance normalization recovers lost coverage
+4.  Improved coverage vs variance and improved spatial equity
+5.  Nonparametric seemed to work best and requires no parameter tuning.
+
+## Limitations
+
+- Formal CP guarantees require exchangeability. This only target empircal robustness.
+- Assumes score–variance relationship transfers across years (may fail under larger shifts)
+- 2022 uses point labels (not full dense raster labels)
+- Ensembles add compute cost
 
 ## Conclusion
 
-## Limitations
+- Ensemble disagreement provides a practical way to make conformal prediction sets more reliable under slight shift for eelgrass segmentation.
+- Works as a post-hoc wrapper: no retraining, no test-time labels
 
 ## Questions?
