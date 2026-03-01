@@ -37,6 +37,8 @@ ablation_summary <- read_csv("data/ablation_summary.csv")
 ![](images/clipboard-2108334707.png)
 
 ::: notes
+Eelgrass is one of the most important habitats in estuaries, while also being some of the most threatened habitats. As seen in this image from the Morro Bay National Estuary program, we can see the major decline in eelgrass in Morro Bay which led to many monitoring, research, and restoration efforts with Cal Poly, Cuesta College, and other organzations that has managed to restore eelgrass coverage.
+
 Image from: https://www.mbnep.org/eelgrass/
 :::
 
