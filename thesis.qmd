@@ -19,7 +19,6 @@ format:
       - frontmatter/copyright-page.tex
       - frontmatter/committee-page.tex
       - frontmatter/abstract.tex
-      - frontmatter/acknowledgments.tex
       - frontmatter/table-of-contents.tex
     number-sections: true
     citation-style: apa
@@ -43,7 +42,7 @@ ablation_summary <- read_csv("data/ablation_summary.csv")
 
 # Introduction
 
-Eelgrass (*Zostera marina*) is a seagrass species of temperate waters that provides an anchor to coastal ecosystems by providing sediment stabilization, carbon sequestration, habitats for protected species, and eliminating contamination. Warming oceans, storm regimes, and local disturbance have quickly reshaped the intertidal morphology and habitat extent. As these threats increase, there is a need to monitor changes to determine appropriate environmental management. In recent years, deep networks have made this intertidal mapping practical for complex imagery, achieving strong pixel-wise accuracy in areas such as Morro Bay, California [@tallam2023]. However, the reliability of general utilization of these classification models not only relies on high-accuracy segmentation, but also on rigorous uncertainty quantification under temporal and spatial distribution shift. Imagery collected over different years, at different tides or seasons, can erode the model's calibration, causing it to be over-confident. This study builds off existing models to create a post-hoc uncertainty framework that’s robust to distributional shift.
+Eelgrass (*Zostera marina*) is a seagrass species of temperate waters that provides an anchor to coastal ecosystems by providing sediment stabilization, carbon sequestration, habitats for protected species, and eliminating contamination. Warming oceans, storm regimes, and local disturbance have quickly reshaped the intertidal morphology and habitat extent. As these threats increase, there is a need to monitor changes to determine appropriate environmental management. In recent years, deep networks have made this intertidal mapping practical for complex imagery, achieving strong pixel-wise accuracy in areas such as Morro Bay, California [@tallam2023]. However, the reliability of general utilization of these classification models not only relies on high-accuracy segmentation, but also on rigorous uncertainty quantification under temporal and spatial distribution shift. Imagery collected over different years, at different tides or seasons, can erode the model's calibration, causing it to be over-confident. This study builds off existing models to create a post-hoc uncertainty framework that is robust to distributional shift.
 
 Uncertainty quantification is a requirement for flagging ambiguous areas. To address this, split conformal prediction provides an appealing framework. It offers a wrapping of any probabilistic predictor to produce prediction sets with an average coverage guarantee under exchangeability, simply by using a calibration set and a quantile nonconformity score [@angelopoulos2021]. In classification, a natural choice of noncormity score is: $$s=1-p_y,$$ where $p_y$ is the model’s predicted probability for the true class y. This yields a prediction set of all labels whose scores do not exceed a global threshold learned on calibration. With stable data, this can be simple and effective; however, in reality, the distribution of scores can differ by difficulty. A threshold calibrated over one year can underperform when a distributional shift occurs, such as temporal drift.
 
@@ -64,11 +63,11 @@ Effective eelgrass monitoring requires models that both provide accurate predict
 
 Uncertainty in predictive modeling is commonly broken up into two components: *epistemic* and *aleatoric*. These two components collectively comprise the total uncertainty in a model's predictions. Aleatoric uncertainty represents the noise inherent in observations, which is often impossible to remove, even with the addition of more data (e.g. sensor noise or true label ambiguity). Even a perfect model cannot remove it. Epistemic uncertainty represents the uncertainty of the model itself, which can be reduced with additional or higher-quality data [@kendall2017].
 
-For modern vision models, raw probabilities are often miscalibrated, meaning the output confidence does not match empirical accuracy. This can be especially prevalent when the distribution of future data shifts, in which case models can be confident yet wrong. Post-hoc calibration, such as temperature scaling, rescales logits via $$\text{softmax}(z/T),$$ where $T>0$ is a temperature parameter learned on a validation set. This improves in-distribution calibration without changing accuracy [@guo2017]. Under shift, however, calibration is not enough, as the structure of the errors can change. Thus, it requires an uncertainty representation that integrates decision rules that signal the difficulty of the prediction.
+For modern vision models, raw probabilities are often miscalibrated, meaning the output confidence does not match empirical accuracy. This can be especially prevalent when the distribution of future data shifts, in which case models can be confident yet wrong. Post-hoc calibration, such as temperature scaling, rescales raw logistic output $z$ via $$\text{softmax}(z/T),$$ where $T>0$ is a temperature parameter learned on a validation set. This improves in-distribution calibration without changing accuracy [@guo2017]. Under shift, however, calibration is not enough, as the structure of the errors can change. Thus, it requires an uncertainty representation that integrates decision rules that signal the difficulty of the prediction.
 
 ## Deep Ensembles
 
-Deep ensembles can address uncertainty by aggregating predictions from models trained independently with different initializations or architectures. For estimating epistemic uncertainty, member disagreements can be calculated by considering the variance in member probabilities or logits. Given ensemble members $\{f_k\}_{k=1}^K$ that produce $p_y^{(k)}(x)$, $V(x) = Var_k(p_y^{(k)}(x))$. Ensembles have not only been found to be more robust under shift, but explicitly accounting for epistemic uncertainty helps prevent models from being overconfident when the input data changes [@ovadia2019]. Additionally, ensembles require no specialized inference and can easily integrate with existing training code, providing a difficulty proxy for uncertainty. This does come at the additional computational cost of training additional models. However, many models are often trained during the model selection process, which, when ensembled, can outperform individual models.
+Deep ensembles can address uncertainty by aggregating predictions from models trained independently with different initializations or architectures. For estimating epistemic uncertainty, member disagreements can be calculated by considering the variance in member probabilities or logits. Given ensemble members $\{f_k\}_{k=1}^K$ that produce $p_y^{(k)}(x)$, $$V(x) := Var_k\left(\left\{p_y^{(k)}(x)\right\}\right)$$. Ensembles have not only been found to be more robust under shift, but explicitly accounting for epistemic uncertainty helps prevent models from being overconfident when the input data changes [@ovadia2019]. Additionally, ensembles require no specialized inference and can easily integrate with existing training code, providing a difficulty proxy for uncertainty. This does come at the additional computational cost of training additional models. However, many models are often trained during the model selection process, which, when ensembled, can outperform individual models.
 
 ## Semantic Segmentation in Environmental Monitoring
 
@@ -76,19 +75,50 @@ Semantic image segmentation is a deep learning neural network technique that ass
 
 ## Conformal Prediction Foundations
 
-Conformal prediction provides a model and distribution-free technique to convert probability scores into prediction sets with finite-sample marginal coverage under exchangeability [@angelopoulos2021]. For a classifier with probabilities $\{p(x_i)\}^n_{i=1}$, a simple *nonconformity score* is $s(x)=1-p_y(x)$, which is small when the model is confident in the true class. In split conformal prediction, scores are computed on a calibration set $C$ of size $n$ and the finite-sample-corrected quantile is selected $\hat{q}_\alpha = \operatorname{Quantile}_{\lceil (n + 1)(1 - \alpha) \rceil / n}(\{s_i\})$, then the set value prediction is outputed $$C_\alpha(x)=\{y:s(x)\leq\hat{q}_\alpha\}$$ This procedure guarantees $P\{Y∈C_\alpha(X)\}\geq1-\alpha$ for new points drawn from the same distribution as the calibration data regardless of the underlying model. Two limitations of conformal prediction motivate this thesis. The first limitation is that the guarantee is marginal. This means there is no guarantee of conditional coverage, that the per class coverage will be $\geq$ target, and that coverage is not guaranteed across differing inputs, such as varying difficulty. Second, conformal prediction has mathematical validity due to the concept of symmetry (data could have been seen in any order) as long as the data is exchangeable. Coverage guarantees are lost as distribution drifts, and the model can become overly confident, leading to under-coverage. To address these problems, we need to use an adaptive variant of conformal prediction, which is more conservative for harder inputs.
+Conformal prediction provides a model and distribution-free technique to convert probability scores into prediction sets with finite-sample marginal coverage under exchangeability [@angelopoulos2021]. For a classifier with probabilities $\{p(x_i)\}^n_{i=1}$, a simple *nonconformity score* is $s(x)=1-p_y(x)$, which is small when the model is confident in the true class. In split conformal prediction, scores are computed on a calibration set $C$ of size $n$ and the finite-sample-corrected quantile is selected $\hat{q}_\alpha = \operatorname{Quantile}_{\lceil (n + 1)(1 - \alpha) \rceil / n}(\{s_i\})$, and the prediction set is defined as $$C_\alpha(x)=\{y:s(x)\leq\hat{q}_\alpha\}$$ 
+The full split conformal procedure is summarized in Algorithm \ref{alg-split-cp}.
+
+```{=latex}
+\begin{algorithm}
+\caption{Split Conformal Prediction for Classification}
+\label{alg-split-cp}
+\textbf{Input:} Training data $(X_{train},Y_{train})$, calibration data $(X_{cal},Y_{cal})$, miscoverage level $\alpha$ \\[4pt]
+\textbf{Output:} Prediction set $C_\alpha(x)$ for each test point $x$
+\begin{enumerate}
+\item Train classifier $f$ on $(X_{train},Y_{train})$.
+\item For each calibration point $(x_i,y_i)$:
+\begin{enumerate}
+\item Compute predicted probabilities $\hat p_i = f(x_i)$.
+\item Compute nonconformity score $s_i = 1 - \hat p_i(y_i)$.
+\end{enumerate}
+\item Compute the finite-sample corrected quantile
+\[
+\hat q_\alpha = \operatorname{Quantile}_{\lceil (n+1)(1-\alpha)\rceil/n}(s_1,\dots,s_n).
+\]
+\item For a new input $x$:
+\begin{enumerate}
+\item Compute probabilities $\hat p = f(x)$.
+\item Return prediction set
+\[
+C_\alpha(x) = \{y : 1 - \hat p(y) \le \hat q_\alpha\}.
+\]
+\end{enumerate}
+\end{enumerate}
+\end{algorithm}
+```
+This procedure guarantees $P\{Y∈C_\alpha(X)\}\geq1-\alpha$ for new points drawn from the same distribution as the calibration data regardless of the underlying model. Two limitations of conformal prediction motivate this thesis. The first limitation is that the guarantee is marginal. This means there is no guarantee of conditional coverage, that the per class coverage will be above the target, and that coverage is not guaranteed across differing inputs, such as varying difficulty. Second, conformal prediction has mathematical validity due to the concept of symmetry (data could have been seen in any order) as long as the data is exchangeable. Coverage guarantees are lost as distribution drifts, and the model can become overly confident, leading to under-coverage. To address these problems, we need to use an adaptive variant of conformal prediction, which is more conservative for harder inputs.
 
 ## Adaptive or Shift-Aware CP
 
 There is a substantial amount of literature that aims to make CP adaptive to heterogeneity or robust during dataset drift. A recurring issue is that a single global conformal threshold calibrated on held-out in-distribution data can be both overly conservative for easy inputs and insufficiently conservative for difficult ones. This problem becomes even more pronounced for a model deployed under dataset drift.
 
-In regression, heteroskedasticity motivates methods that adapt to local noise, instead of constant-width thresholds. For example, conformalized quantile regression @romano, combines conformal prediction with classical quantile regression to provide intervals that vary with conditional spread. More generally, normalization approaches target a similar idea, rescaling nonconformity scores by an estimate of uncertainty so a global quantile is more appropriate under heterogeneity [@dewolf2025].
+In regression, heteroskedasticity motivates methods that adapt to local noise, instead of constant-width thresholds. For example, conformalized quantile regression [@romano], combines conformal prediction with classical quantile regression to provide intervals that vary with conditional spread. More generally, normalization approaches target a similar idea, rescaling nonconformity scores by an estimate of uncertainty so a global quantile is more appropriate under heterogeneity [@dewolf2025].
 
-When exchangeability is violated between the test and calibration set, achieving reliable coverage can be even more challenging. Methods such as adaptive conformal inference @gibbs use an adaptive time-varying parameter that is continuously re-estimated to maintain coverage. Other approaches specifically target covariate shift, such as @Tibshirani, which uses weighting based on likelihood ratios when they can be estimated. While these methods can provide formal routes for validity beyond exchangeability, they often require continuous feedback, additional assumptions, or quantities that are difficult to estimate reliably in high-dimensional vision problems.
+When exchangeability is violated between the test and calibration set, achieving reliable coverage can be even more challenging. Methods such as adaptive conformal inference [@gibbs] use an adaptive time-varying parameter that is continuously re-estimated to maintain coverage. Other approaches specifically target covariate shift, such as @Tibshirani, which uses weighting based on likelihood ratios when they can be estimated. While these methods can provide formal routes for validity beyond exchangeability, they often require continuous feedback, additional assumptions, or quantities that are difficult to estimate reliably in high-dimensional vision problems.
 
 In this study, we focus on difficulty-normalized conformal scores using epistemic uncertainty. We do not focus on establishing conformal guarantees under shift, and instead tailor the idea of difficulty adaptive/normalized scores to temporal drift.
 
-Let $S=s(X,Y)$ denote the standard noncomformity score and let $V=v(X)$ be a one-dimensional difficulty proxy from the deep ensemble (member-probability variance after temperature scaling). We can use this proxy to stabilize the score with respect to $V$. We normalize under a multiplicative difficulty assumption $$S=a(V)U,\quad a(V)>0,\quad U \perp \!\!\! \perp V,$$ where U represents a difficulty invariant component of the nonconformity score, assumed to be independent of V. Then, $S'=S/a(V)\approx U$, so $S'|V$ becomes approximately invariant, and locally tuned to difficulty. Normalization targets the actual failure under shift, so that the global threshold will become too lenient for the hard OOD inputs. On the calibration set, we estimate $\hat{a} \approx E[S|V=v]$ via quantile binning and smooth interpolation, and then conformalize the normalized score $S’=S/\hat{a}(V)$. Thus, if the conditional distribution $S|V=v$ is roughly the same across years: $$S∣V=v (calibration)\approx S∣V=v (test),$$ then we expect the normalized scores to be approximately stable conditional on $V$. Then the global quantile will be appropriate across the shifted years. Intuitively, pixels with large member disagreements (hard pixels) would have larger scores. Dividing by $\hat{a}(V)$ will equalize the scores, so that hard and easy pixels are all scored equally, being precise on easy inputs and conservative on difficult ones. By using a difficulty signal (epistemic uncertainty) that is specifically “shift-aware,” we expect that the score becomes shift-aware as well.
+Let $S=s(X,Y)$ denote the standard noncomformity score and let $V=v(X)$ be a one-dimensional difficulty proxy from the deep ensemble (member-probability variance after temperature scaling). We can use this proxy to stabilize the score with respect to $V$. We normalize under a multiplicative difficulty assumption $$S=a(V)U,\quad a(V)>0,\quad U \perp \!\!\! \perp V,$$ where U represents a difficulty invariant component of the nonconformity score, assumed to be independent of V. Then, $S'=S/a(V)\approx U$, so $S'|V$ becomes approximately invariant, and locally tuned to difficulty. Normalization targets the actual failure under shift, so that the global threshold will become too lenient for the hard OOD inputs. On the calibration set, we estimate $\hat{a} \approx E[S|V=v]$ via quantile binning and smooth interpolation, and then conformalize the normalized score $S'=S/\hat{a}(V)$. Thus, if the conditional distribution $S|V=v$ is roughly the same across years: $$S∣V=v (calibration)\approx S∣V=v (test),$$ then we expect the normalized scores to be approximately stable conditional on $V$. Then the global quantile will be appropriate across the shifted years. Intuitively, pixels with large member disagreements (difficult pixels) would have larger scores. Dividing by $\hat{a}(V)$ will equalize the scores, so that difficult and easy pixels are all scored equally, being precise on easy inputs and conservative on difficult ones. By using a difficulty signal (epistemic uncertainty) that is specifically “shift-aware,” we expect that the score becomes shift-aware as well.
 
 # Methodology
 
@@ -106,7 +136,12 @@ For model development, imagery from 2018-2021 is treated as in-distribution (ID)
 Example 448×448 px tile from the drone orthomosaic and corresponding manually digitized eelgrass label.
 :::
 
-2021 was chosen as the *calibration year* as it is the most recent pre-2022 year. For 2021, the data was partitioned into four subsets: 1. a train subset (together with 2018-2020), 2. a small temperature-scaling subset to estimate the models' over- or underconfidence in their softmax probabilities, 3. a CP calibration subset to compute conformal scores and quantiles, and 4. an evaluation subset to test in-distribution coverage. The OOD 2022 evaluation set is thus never used in training, temperature scaling, or conformal calibration.
+2021 was chosen as the *calibration year* as it is the most recent pre-2022 year. For 2021, the data was partitioned into four subsets: 
+
+1. a train subset (together with 2018-2020)
+2. a small temperature-scaling subset to estimate the models' over- or underconfidence in their softmax probabilities
+3. a CP calibration subset to compute conformal scores and quantiles
+4. an evaluation subset to test in-distribution coverage. The OOD 2022 evaluation set is thus never used in training, temperature scaling, or conformal calibration.
 
 ## Model Training and Inference Pipeline
 
@@ -128,27 +163,31 @@ Model architectures included in the ensemble. Images from the ArcGIS Learn devel
 
 Models were trained for 20 epochs, and using a held-out validation set, the best checkpoint (best validation loss) was selected to be included in the ensemble.
 
-::: {#fig-loss layout-ncol="1" fig-pos="H"}
-![](images/clipboard-1054493005.png)
-
-Example training and validation loss curve for DeepLabV3 4 year model
-:::
-
 ### Probability Calibration and Aggregation
 
-At inference time, each of the models produces per-pixel log-odds, which are then temperature-scaled, converted to class probabilities, and aggregated. Temperature scaling calibrates the model confidence using a scalar temperature $T > 0$, which is calculated by minimizing the negative log-likelihood on a holdout set designated for calibration [@guo2017]. For each model $f_k$, producing log-odds $z^{(k)}(x)$, estimated probabilities are then computed using temperature scaled softmax: $$\hat{p}^{(k)}(x; T) = \text{softmax}(\frac{z^{(k)}(x)}{T}).$$
+At inference time, each of the models produces per-pixel log-odds, which are then temperature-scaled, converted to class probabilities, and aggregated. Temperature scaling calibrates the model confidence using a scalar temperature $T > 0$, which is calculated by minimizing the negative log-likelihood on a holdout set designated for calibration [@guo2017]. For each model $f_k$, producing log-odds $z^{(k)}(x)$, estimated probabilities are then computed using temperature scaled softmax: $$\hat{p}^{(k)}(x; T) = \text{softmax}\left(\frac{z^{(k)}(x)}{T}\right).$$
 
-We then compute the ensemble-averaged calibrated probability for class $y$ at pixel $x$, $$\hat{p}_y(x)= \frac{1}{K} \sum_{k=1}^K p_k(y| x; T).$$ The ensemble prediction is thus the aggregated probability. Each model’s individual probability output, $p_k(y| x; T)$, is also retained for computing the epistemic uncertainty proxy.
+We then compute the ensemble-averaged calibrated probability for class $y$ at pixel $x$, $$\hat{p}(y|x)= \frac{1}{K} \sum_{k=1}^K p_k(y| x; T).$$ The ensemble prediction is thus the aggregated probability. Each model’s individual probability output, $p_k(y| x; T)$, is also retained for computing the epistemic uncertainty proxy.
 
-For each labeled point x, we compute the epistemic variance proxy based on member disagreement for the true class, $$\hat{V}(x) = \widehat{Var}\{p_k(y_{true}| x; T))\}$$ To assess how the uncertainty proxy relates to errors, we use selective accuracy curves and correlation analyses. This was done with the variance scores (our epistemic proxy), as well as entropy (1) and mutual information (2) uncertainty scores for comparison: $$
-1. H(x)
-= - \sum_{y} \hat{p}_y(x)\,\log \hat{p}_y(x)
-$$ $$
+For each labeled point x, we compute the epistemic variance proxy based on member disagreement for the true class, $$\hat{V}(x) = \widehat{Var}\{p_k(y_{true}| x; T))\}$$ To assess how the uncertainty proxy relates to errors, we use selective accuracy curves and correlation analyses. This was done with the variance scores (our epistemic proxy), as well as entropy (1) and mutual information (2) uncertainty scores for comparison. Let
+
+$$
+H(p)
+= - \sum_{y} p(y)\,\log p(y)
+$$ 
+represent the entropy of a class-probability distribution p. Then the comparison metrics are 
+
+$$
+1. H(\hat p(y \mid x))
+$$
+and
+$$
 2. \mathrm{MI}(x)
-= H\!\left(\hat{p}(x)\right)
+= H\!\left(\hat{p}(y \mid x)\right)
 - \frac{1}{K}\sum_{k=1}^K
-H\!\left(p_k(x)\right)
-$$ However, these were not tested in conformalizing equations as they mix aleatoric and epistemic uncertainties and are implicitly correlated with the probability-based nonconformity scores $s_y$. To create a selective accuracy curve, take a given uncertainty score $u(x)$ and sort by decreasing $u(x)$. We then iteratively recompute accuracy scores on smaller and smaller subsets of higher confidence points. For an informative uncertainty metric (that ranks errors well), we should observe a monotonic increase in accuracy as the size of the subset decreases.
+H\!\left(p_k(y \mid x)\right)
+$$ 
+However, these were not tested in conformalizing equations as entropy mixes aleatoric and epistemic uncertainties and is implicitly correlated with the probability-based nonconformity scores $s_y$, and mutual information seemed to rank errors less effectively according to selective accuracy analysis. To create a selective accuracy curve, take a given uncertainty score $u(x)$ and sort by decreasing $u(x)$. We then iteratively recompute accuracy scores on smaller and smaller subsets of higher confidence points. For an informative uncertainty metric (that ranks errors well), we should observe a monotonic increase in accuracy as the size of the subset decreases.
 
 ## Split CP for Classification
 
@@ -276,8 +315,8 @@ id_lambda_tbl <- data.frame(
 colnames(id_lambda_tbl) <- c("Method", "q-hat",
   "Coverage", "% singletons",
   "% empty", "% two-label")
-  
-  id_lambda_tbl |>
+
+id_lambda_tbl |>
   knitr::kable(digits = 3)
 ```
 
@@ -687,17 +726,23 @@ gg_setcomp
 
 This study developed and evaluated a practical uncertainty pipeline for time-series eelgrass segmentation that is reliable under temporal distribution shift. We were motivated by the reality that ecological modeling is deployed across years with differing image conditions and requires useful uncertainty estimates for truly reliable models. Building off existing strong deep segmentation models, we combined heterogeneous deep ensembles, probability calibration, and conformal prediction to produce classification sets at a user-defined confidence level. While standard conformal prediction provides finite-sample marginal coverage under exchangeability, realistic year-over-year imagery often violates this assumption, causing conformal prediction to under-cover on temporally shifted data and resulting in a larger concentration of errors in the most difficult regions, precisely where uncertainty estimates would be most useful.
 
-The primary contribution is a variance-aware normalization strategy for conformal classification. We normalized the vanilla nonconformity score by ensemble disagreement (member-probability variance after temperature scaling) as a proxy for epistemic difficulty. We specifically studied two variants: a parametric linear normalization $S/(1+\lambda V)$ and a nonparametric normalization $S/\hat{a}V$ with $\hat {a} \approx E[S|V=v]$ learned via quantile binning and interpolation on the calibration set. The approach is based on score normalization ideas in conformal prediction, which have not been thoroughly investigated under drift.
+The primary contribution is an investigation of variance-aware normalization strategy for conformal classification under temporal distribution shift. We normalized the vanilla nonconformity score by ensemble disagreement (member-probability variance after temperature scaling) as a proxy for epistemic difficulty. We specifically studied two variants: a parametric linear normalization $S/(1+\lambda V)$ and a nonparametric normalization $S/\hat{a}V$ with $\hat {a} \approx E[S|V=v]$ learned via quantile binning and interpolation on the calibration set. The approach is based on score normalization ideas in conformal prediction, which have not been thoroughly investigated under drift.
 
 On Morro Bay imagery, the ensemble improved predictive performance compared to the individual models, and the produced uncertainty scores effectively ordered errors. In distribution (2021), all conformal methods achieved target coverage on a held-out test set with very similar set compositions, which confirms that the normalization does not degrade coverage under exchangeability. Under temporal shift (2022), vanilla conformal prediction under-covered, with errors, specifically concentrated on areas of high uncertainty. Variance-aware normalization was able to largely mitigate the issue and recover the lost coverage. The linear method recovered nominal coverage under a moderate $\lambda$ of 3, resulting in a reduction of empty sets and a slight increase in 2-set classes. The nonparametric method performed the best overall, achieving near or slightly conservative coverage for all $\alpha$ and best set composition. Beyond the global coverage, variance-aware normalization also improved the class-conditional coverage disparity by reducing the gap between eelgrass coverage and other. It also improved the spatial robustness by lowering blockwise coverage variability and weakening the relationship between blockwise coverage and uncertainty.
 
 Overall, the results support the claim that a shift-aware epistemic proxy can be used to stabilize the conformal scores under a slight temporal shift without retraining, test-time labels, or any additional models training beyond those trained during model selection. This framework can be especially useful for environmental monitoring as it provides users with both predictions and an estimate of reliability. It flags areas of uncertainty, where future annotations would be most impactful.
 
-# Limitations
+## Limitations
 
 There are several limitations to be considered with the conclusion. First, conformal coverage guarantees are formally tied to exchangeability. While variance-aware normalization improved the empirical robustness under drift, it does not provide a theoretical guarantee. The approach relies on the assumption that the relationship between score magnitude and the difficulty proxy is stable across years, which could fail under larger shifts. Additionally, the study evaluates temporal OOD behavior using point-labeled 2022 data, as full polygon data labeling can be quite extensive. This can be useful, but could miss spatial patterns in fully segmented tiles. Lastly, the uncertainty metric is approximated via ensembles. Although this is a common method for approximating uncertainty, it also introduces additional computational cost.
 
-# Computational Details
+## Future Work
+
+Several possible areas remain for extending and strengthening this work. While variance-aware score normalization demonstrated strong empirical performance under moderate shift, future work should benchmark this approach against other conformal methods designed for distribution drift, such as weighted conformal prediction. Comparisons on high-dimensional imagery could provide useful insight into how conformal approaches scale. Future work could also examine robustness under larger distribution shifts, including imagery from different seasons, or entirely different estuaries. This would help provide understanding on whether the learned relationship between conformal scores and epistemic difficulty proxies can remain stable under stronger domain changes. Future work could also explore alternative uncertainty proxies. 
+
+Lastly, theoretical work could investigate the behavior of normalizing scores under non-exchangeable data. Understanding how scores normalization interacts with covariate shift could help clarify when these strategies prove to be most effective.
+
+## Computational Details
 
 All experiments and analyses were implemented in Python and executed in a Windows ArcGIS Pro Python environment. Deep-ensemble inference was run via arcgis.learn (loading Esri .emd models) and PyTorch, using an NVIDIA GPU. Geospatial inputs were handled using Rasterio, Fiona, Shapely, and PyProj; numerical computing and tables used NumPy and pandas; statistics utilities used SciPy and scikit-learn; figures were generated with Matplotlib (with tqdm for progress logging). Code to reproduce the computational workflow is available at [https://github.com/DillonMurphy04/eelgrass-cp](https://github.com/DillonMurphy04/eelgrass-cp). Package dependencies are listed in requirements.txt, and full documentation can be found in the repository README.
 

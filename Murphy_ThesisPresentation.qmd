@@ -1,6 +1,6 @@
 ---
 title: "Adaptive Conformal Sets Under Distribution Shift"
-subtitle: "Using Ensemble Disagreement as an Epistemic Normalizer for Eelgrass Segmentation under Temporal Drift"
+subtitle: "Using Ensemble Disagreement for Reliable Eelgrass Mapping"
 author: "Dillon Murphy"
 institute: "Cal Poly San Luis Obispo"
 format:
@@ -37,32 +37,55 @@ ablation_summary <- read_csv("data/ablation_summary.csv")
 ![](images/clipboard-2108334707.png)
 
 ::: notes
-Eelgrass is one of the most important habitats in estuaries, while also being some of the most threatened habitats. As seen in this image from the Morro Bay National Estuary program, we can see the major decline in eelgrass in Morro Bay which led to many monitoring, research, and restoration efforts with Cal Poly, Cuesta College, and other organzations that has managed to restore eelgrass coverage.
+- Eelgrass is one of the most important habitats in estuaries, while also being some of the most threatened habitats. 
+- This image is from the Morro Bay National Estuary program, we can see the major decline in eelgrass in Morro Bay which led to many monitoring, research, and restoration efforts with Cal Poly, Cuesta College.
+- Importantly, keep in mind the change in the distribution of eelgrass between these years.
 
 Image from: https://www.mbnep.org/eelgrass/
 :::
 
 ## Why eelgrass mapping matters
 
--   Eelgrass (*Zostera marina*) supports coastal ecosystems (habitat restoration, sediment stabilization, carbon sequestration)
--   Monitoring requires accurate maps over time (different imaging conditions)
--   Actual deployments need reliability: when should we trust the model?
+-   Eelgrass (*Zostera marina*) supports  <span style="color:#1f77b4; font-weight:600;">coastal ecosystems</span> (habitat restoration, sediment stabilization, carbon sequestration)
+-   Monitoring requires accurate maps <span style="color:#1f77b4; font-weight:600;">over time</span> (different imaging conditions)
+-   Actual deployments need reliability: <span style="color:#1f77b4; font-weight:600;">when should we trust the model?</span>
+
+::: notes
+- So why does eelgrass mapping matter?
+- As mentioned it supports coastal ecosystems, providing food and shelter to marine species.
+- Thus, it is important to track and monitor eelgrass. Monitoring eelgrass require accurate maps over time, when conditions might drift, as seen in previous slide.
+- Actual deployments of any model need to be reliable. We need to know when should we trust the models predictions or when the model is uncertain.
+:::
 
 ## Core Problem: Domain Shift Breaks Confidence
 
 -   Imagery can change year-to-year (tide height, lighting, turbidity, morphology, drone degradation)
--   A model can be confident yet wrong under drift
+-   A model can be confident yet wrong when the data changes (drift)
 -   Want uncertainty quantification that flags:
     -   ambiguous pixels
     -   "shifted" regions where model less reliable
 
+::: notes
+- So this brings me to the core problem, that domain shifts break model confidence
+- So as we saw imagery can change year-to-year. This can be for a multitude of reasons in deployment such as tide height, morphology, drone degradation or more.
+- When the data changes over time (or drifts) a model's predictions can be confident yet wrong.
+- So we need an uncertainty quantification method that flags both ambiguous pixels and tells us where exactly these "shifted" regions are where the model is less reliable
+:::
+
 ## Data: Morro Bay, California (2018–2022)
 
--   DJI Phantom 4 Pro drone orthomosaics of Morro Bay estuary, California
+-   Drone imagery of Morro Bay estuary, California
 -   Labels:
-    -   2018–2021: dense polygon annotations → rasterized labels
-    -   2022: 1,000 human-labeled points (cheap evaluation)
--   Tiling: 448×448 chips, 50% overlap
+    -   Train (2018–2021): pixel-level mask
+    -   Test (2022): 1,000 human-labeled points
+-   Tiling: 448×448 chips
+
+::: notes
+- Here is the data which was used for the project, it consists of dron imagery from the Morro Bay Estuary from 2018 to 2022.
+- We used 2018 to 2021 as the training data and this consisted of full pixel level annotations from Cal Poly student experts over the entire estuary
+- Then 2022 was the testing data, which just included 1,000 human-labeled points, as it is quite time consuming to get the full pixel level annotations.
+- Then we tile the estuary into 448 by 448 pixel chips for the model.
+:::
 
 ------------------------------------------------------------------------
 
@@ -74,6 +97,12 @@ Image from: https://www.mbnep.org/eelgrass/
 ![Binary Ground-Truth Mask (Rasterized from Polygons)](images/clipboard-2145080233.png){width="100%"}
 :::
 
+::: notes
+- So here is an example of one of the 2021 annotated chips
+- On the left we can see the image, while the right shows the corresponding eelgrass mask
+- So eelgrass is on the bottom in white and other is above, to get a good idea of what eelgrass looks like.
+:::
+
 ## Background Concepts
 
 ## Types of Uncertainty
@@ -81,7 +110,15 @@ Image from: https://www.mbnep.org/eelgrass/
 -   Predictive uncertainty is the sum of aleotoric and epistemic uncertainties.
     -   Aleotoric: noise inherent to data
     -   Epistemic: model uncertainty (insufficient/shifted knowledge)
--   Under drift, a proxy for epistemic uncertainty should increase
+-   Under drift, epistemic uncertainty should increase
+
+::: notes
+- Sofirst to discuss the types of uncertainty
+- Predictive uncerainty can be broken up into two components: aleotoric and epistemic uncertainties
+- Aleotoric uncertainty is noise that is inherent to data or system and cannot be reduced, even with the addition of more data or improving the model. An example in computer vision could be low-resolution imagery noise.
+- Epistemic ucertainty is uncertainty from insufficient or shifted knowledge in the model.
+- Under drift, epistemic uncertainty should increase
+:::
 
 ## Deep Ensembles
 
@@ -89,7 +126,9 @@ Image from: https://www.mbnep.org/eelgrass/
 -   Practical epistemic proxy - disagreement: $V(x) = Var_k(p_y^{(k)}(x))$
 
 ::: notes
-Members disagree more on OOD/hard pixels → variance rises.
+- Deep ensembles consist of individual ensemble members who each produce class probability outputs.
+- We can then use these outputs to create a practical epistemic proxy, being the disagreement between each member. In this case, I used the variance between member probabilities.
+- Intuitively, members should disagree more on OOD/hard pixels → variance rises.
 :::
 
 ## Model Architectures Used
@@ -113,80 +152,115 @@ Members disagree more on OOD/hard pixels → variance rises.
 ::::::
 
 ::: notes
-Heterogeneous ensemble improves uncertainty diversity.
-
-2 of each model architecture were added (1 single year 1 multi-year)
-
-Training was performed using dual NVIDIA RTX 3090 GPUs, and took approximately one week for 4-year models and three days for single-year models.
-
-The models were trained using the ArcGIS Learn Python module. For the two DeepLabV3+ models, we used a ResNet-101 backbone pre-trained on ImageNet, whereas the U-Net models, by default, use a ResNet-34 encoder. SAM-LoRA uses a pre-trained SAM encoder (vision transformer-based model) and inserts low-rank adapter layers to adapt the model for eelgrass segmentation, without fully tuning the model.
+- In my ensemble specifically I used 6 models, and 3 different architectures.
+- The 3 architectures were DeepLabv3+, U-Net, and SAM-LoRA.
+- For each architecture one single-year (2021) and one multi-year (2018–2021) model was trained
 :::
 
-## Split Conformal Prediction for Classification (vanilla baseline)
+------
 
-![](images/clipboard-4072532145.png)
+**Split Conformal Prediction**
+
+::: {.tiny}
+
+**Goal:** For each pixel, return a set of possible labels with ~$1-\alpha$ coverage.
+
+1. Train a classifier that outputs $p(y|x)$
+
+2. Use a holdout (calibration) set to choose a cutoff $\hat q_\alpha$:
+   - For each point, measure how wrong the model was
+     (low probability on the true label = big error)
+
+3. For a new pixel \(x\), include a label if its probability is high enough:
+$$
+C(x)=\{y:p(y \mid x)\ge 1-\hat q_\alpha\}.
+$$
+::: 
 
 ::: notes
+- Now for the split conformal prediction algorithm
+- So first you take any model which outputs class probabilities, trained on a training set
+- then on a calibration set, for each point you measure how wrong the model was, also known as how nonconforming the models output was for that prediction. So a low predicted probability for the true class means a big error. You then order these noncofrmity scores to get a threshold q alpha.
+- Then on your test set, for a new pixel, include a class in your prediction set if it's probability is high enough compared to your threshold.
+- So instead of giving you a single class prediction, conformal prediction provides a prediction of plausible class sets, which likely contains your true class.
+
+This gives us some nice guarantees:
+- Coverage (average number of sets including true class) will be at least 1-alpha
+- Works for any data distribution, without making any distributional assumptions
+- Works for any predictive model, even if mispessified
+
 Image: https://daniel-bethell.co.uk/posts/conformal-prediction-guide/
-
-noncormity score is: $$s=1-p_y,$$ where $p_y$ is the model’s predicted probability for the true class y
-
-Split CP: - Compute scores on a calibration set $C$ and get a threshold $\hat q_{\alpha}$ - prediction set: $$C_\alpha(x)=\{y:s(x)\leq\hat{q}_\alpha\}$$
 :::
 
-## Conformal Guarantees
+## Two Main Limitations
 
-1.  Finite-sample coverage guarantee (exact)
-2.  For any data distribution (distribution-free)
-3.  For any predictive model (model-free)
+1.  The guarantee is on average, some regions may over or under cover
+2.  Exchangeability: Assumes future data looks like past data
 
-Two main limitations:
-
-1.  Marginal coverage
-2.  Exchangeability assumption
+If conditions change in 2022, $\hat q_{\alpha}$ becomes too lenient
 
 ::: notes
-In binary: set is empty, singleton, or two-label set.
-
-Key limitation: exchangeability breaks under shift → undercoverage.
-:::
-
-## CP Under Drift
-
--   In 2022, difficult / OOD pixels shift the score distribution: $\hat q_{\alpha}$ becomes too lenient
--   Existing approaches are difficult to apply in high-dimensional drone imagery segmentation
--   Instead tailor difficulty-normalized CP, using ensemble disagreement as a shift-aware normalizer
-
-::: notes
-Existing approaches require continuous labels, density estimation, and additional assumptions that are not possible in high-dimensional expensive eelgrass segmentation.
-
-Difficulty-normalized conformal prediction has been used to address heteroskedasticity and local uncertainty. Here we apply that idea to drift in the drone imagery.
+- However, there are two main limitation of conformal prediction which motivate this thesis.
+- The first is that the coverage guarantee is over all points, meaning some regions, or classes may over or under cover.
+- The second big reason is the assumption of exchangeability, which is that our future data from our test set should look like and come from the same distribution as our past data.
+- If conditions change in 2022, our computed threshold will become too lenient causing us to undercover.
 :::
 
 ## Variance-Aware Score Normalization
 
+Take vanilla score (how wrong model is):
+$$
+S(y\mid x) = 1 - p(y \mid x).
+$$
+
+Normalize by difficulty $(V(x))$
+
+::: notes
+- To mitigate this, we use variance-aware score normalization
+- So a standard vanilla nonconformity score is simply 1 - probability of the true class
+- We can then normalize this score by difficulty to get more adaptive prediction sets.
+:::
+
 ## Method 1: Parametric Linear Scaling
 
-Replace vanilla score s with $s_i^\star = s_i/g(v_i), i \in C$. Then do split cp on $s^\star$.
-
-$$S_{\lambda}(x,y)=\frac{S(x,y)}{1+\lambda V(x)},\quad \lambda \geq 0.$$
+$$S_{\lambda}(y \mid x)=\frac{S(y \mid x)}{1+\lambda V(x)},\quad \lambda \geq 0.$$
 
 -   Assume scores increase linearly with difficulty
 
--   Choose $\lambda$ via grid search balancing OOD coverage and % singletons (efficiency)
+-   Choose $\lambda$ via grid search balancing coverage and % singletons (efficiency)
+
+::: notes
+- So the first method I took a look at is parametric linear scaling
+- For this method, you take the initial vanilla score and divide it by 1 + lambda time the ensemble variance
+- This assumes tat scores increase linearly with difficulty and we can just choose lambda by grid searching to balance coverage with the percentage of singletons
+:::
 
 ## Method 2: Nonparametric Normalization
 
-$$S=a(V)U,\quad a(V)>0,\quad U \perp \!\!\! \perp V \Rightarrow$$
+$$ S'(x,y) = \frac{S(x,y)}{\hat a(V(x))}$$
 
-$$ S'(x,y) = \frac{S(x,y)}{\hat a(V(x))}, \quad \hat a(V) \approx \mathbb{E}[S \mid V] $$
-
--   Assume scores increase multiplicatively
-
--   Learn non-linear scaling a(v), no tuning parameter
+-   No linear assumption
+-   Learn scale function a(v), no tuning parameter
 
 ::: notes
-Estimate $\hat a(V) \approx \mathbb{E}[S \mid V]$ on 2021 calibration: - quantile-bin variance (equal sized bins) - compute the average score for each variance bin - interpolate to define a continuous function
+- The second method is a nonparametric normalization, which does not make that linear assumption
+- For this ethod we simply divide by an estimated scale function from the given variance.
+- This is estimated on 2021 calibration by binning variance into equal sized bins, computing the average score for each variance bin, and interpolate to define a continuous function. So sort of getting the expected score given a variance value.
+:::
+
+------------------------------------------------------------------------
+
+::: {#fig-empirical-calibration-comparison layout-ncol="1" fig-pos="H"}
+![](images/clipboard-2626621009.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
+
+Estimated normalization scale from 2021 calibration compared to the empirical score-variance relationship observed in 2022. The extension shows extrapolation beyond calibration support.
+:::
+
+::: notes
+- So here is that estimate scale fuunction.
+- In the blue shows the actual scale function from the 2021 calibration data, and then in the orange you can compare it to the empirical results from 2022.
+- Additionally, we can see the linear reference in gray, this shows us that it is clearly very nonlinear.
+- In general, the estimated scale function does a fairly good job of capturing the overall trend, although it might be slightly conservative at those higher variance values.
 :::
 
 ## Evaluation Metrics
@@ -199,77 +273,24 @@ Primary:
 Additional:
 
 -   class-conditional coverage
--   coverage vs variance bins
--   spatial robustness
-
-## Ensemble Results
-
-------------------------------------------------------------------------
-
-::: {#fig-ensemble-chip layout-ncol="1" fig-pos="H"}
-![](images/clipboard-249597789.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
-
-Example ensemble inference outputs on a 2022 chip: Raw chip (+ point), ensemble mean probability, ensemble variance, and argmax segmentation.
-:::
+-   coverage vs variance/spatial robustness
 
 ::: notes
-Here is a representative 2022 chip with the ensemble outputs. This includes the raw chip imagery, the ensemble mean probability for the target class, the ensemble variance, and the final class segmentation. Visually, it seems that high ensemble variance aligns with boundaries between eelgrass and non-eelgrass patches as well as ambiguous pixels, such as darker shadows or where features resemble eelgrass RGB. In the example chip, it can be clearly seen that the variance spikes at the boundary between eelgrass and non-eelgrass patches. These results suggest that the disagreement signal is capturing the genuinely difficult pixels in the imagery.
+- So to evaluate each method I took a look at a few metrics
+- the first was global coverage, which we want to be near or above 1- our target alpha
+- then the other important metric is set composition. In the binary case we can have either empty, singleton, or two-label class sets. If a method were to produce all two-labels you would get perfect coverage, so you want to balance the coverage with singletons for better efficiency.
+- Additionally, I took a look at class-conditional coverage and coverage vs variance and spatial robustness.
 :::
 
-------------------------------------------------------------------------
+## Results
 
-```{r}
-#| label: tbl-ensemble-performance
-#| echo: false
-#| warning: false
-#| tbl-cap: "Pixel-wise performance of the ensemble and individual segmentation models on the 2022 evaluation points."
-#| results: asis
-
-ensemble_tbl <- data.frame(
-  TrainingYear = c("N/A",
-  "2021", "2021", "2021",
-  "2018–2021", "2018–2021", "2018–2021"),
-  Model = c("Ensemble",
-  "U-Net", "SAM LoRA", "DeepLab",
-  "U-Net", "SAM LoRA", "DeepLab"),
-  Precision = c(0.9046,
-  0.82, 0.82, 0.88,
-  0.88, 0.81, 0.88),
-  Recall = c(0.8688,
-  0.89, 0.89, 0.80,
-  0.78, 0.80, 0.89),
-  F_Score = c(0.8864,
-  0.86, 0.85, 0.84,
-  0.83, 0.81, 0.86),
-  Accuracy = c(0.9100,
-  0.88, 0.87, 0.88,
-  0.87, 0.84, 0.89)
-)
-
-colnames(ensemble_tbl) <- c("Training Year", "Model", "Precision",
-                            "Recall", "F Score", "Accuracy")
-
-ensemble_tbl |>
-  knitr::kable(digits = 3, align = "c") |>
-  kable_styling(
-    font_size = 30,     
-    full_width = FALSE
-  )
-```
-
-::: notes
-The heterogeneous ensemble achieves an accuracy of 0.910 and an F-score of 0.886, outperforming all individual members, whose accuracies range from 0.840–0.890 and F-scores from 0.810–0.860.
-:::
-
-## In-Distribution Evaluation
-
-------------------------------------------------------------------------
+--------------------
 
 ```{r}
 #| label: tbl-id-lambda
 #| echo: false
 #| warning: false
-#| tbl-cap: 'In-distribution (2021 test) coverage and set composition for vanilla CP, linear variance-normalized scores across ($\lambda$), and the nonparametric normalizer at $\alpha = 0.1$.'
+#| tbl-cap: 'In-distribution (2021 test) coverage for vanilla CP, linear variance-normalized scores across ($\lambda$), and the nonparametric normalizer at $\alpha = 0.1$.'
 #| results: asis
 
 id_lambda_tbl <- data.frame(
@@ -281,15 +302,11 @@ id_lambda_tbl <- data.frame(
   "Linear (λ = 4.0)",
   "Nonparametric"),
   qhat        = c(0.3169, 0.2975, 0.2810, 0.2540, 0.2332, 0.2163, 1.5115),
-  Coverage    = c(0.900, 0.900, 0.900, 0.900, 0.900, 0.900, 0.900),
-  Pct_single  = c(93.9, 93.9, 93.9, 93.9, 93.8, 93.7, 94.5),
-  Pct_empty   = c(6.1, 6.1, 6.1, 6.1, 6.0, 6.1, 4.5),
-  Pct_two     = c(0.0, 0.0, 0.0, 0.0, 0.1, 0.2, 1.0)
+  Coverage    = c(0.900, 0.900, 0.900, 0.900, 0.900, 0.900, 0.900)
 )
 
 colnames(id_lambda_tbl) <- c("Method", "q-hat",
-  "Coverage", "% singletons",
-  "% empty", "% two-label")
+  "Coverage")
   
   id_lambda_tbl |>
   knitr::kable(digits = 3) |> 
@@ -300,12 +317,9 @@ colnames(id_lambda_tbl) <- c("Method", "q-hat",
 ```
 
 ::: notes
-Main takeaway from in-distribution evaluation is that the normalization doesn't break the conformal validity in the in-distribution setting. Differences in the set composition are also very minor; under drift is where the methods begin to differ.
+- So first let's take a look at in distribution results
+- The main takeaway from this table is that when that exchangeability assumption is met, so the data that you test on looks the same as what you trained on, all the methods perform the same, and all get that target coverage.
 :::
-
-## Temporal OOD (2022)
-
-## Linear Normalization
 
 ------------------------------------------------------------------------
 
@@ -313,7 +327,7 @@ Main takeaway from in-distribution evaluation is that the normalization doesn't 
 #| label: tbl-ood-lambda
 #| echo: false
 #| warning: false
-#| tbl-cap: 'Temporal OOD (2022) global coverage and set composition for vanilla CP and linear variance-normalized scores across $\lambda$ at $\alpha = 0.1$.'
+#| tbl-cap: 'Temporal OOD (2022) global coverage and set composition for vanilla CP and variance-normalized scores across $\lambda$ at $\alpha = 0.1$.'
 #| results: asis
 
 ood_lambda_tbl <- data.frame(
@@ -322,15 +336,12 @@ Method      = c("Vanilla",
 "Linear (λ = 1.0)",
 "Linear (λ = 2.0)",
 "Linear (λ = 3.0)",
-"Linear (λ = 4.0)"),
-Coverage    = c(0.860, 0.867, 0.871, 0.891, 0.901, 0.908),
-Pct_single  = c(92.7, 94.4, 95.4, 95.6, 93.8, 92.4),
-Pct_empty   = c(7.3, 5.6, 4.5, 3.0, 2.5, 2.1),
-Pct_two     = c(0.0, 0.0, 0.1, 1.4, 3.7, 5.5)
+"Linear (λ = 4.0)",
+"Nonparametric"),
+Coverage    = c(0.860, 0.867, 0.871, 0.891, 0.901, 0.908, 0.906)
 )
 
-colnames(ood_lambda_tbl) <- c("Method", "Coverage",
-"% singletons", "% empty", "% two-label")
+colnames(ood_lambda_tbl) <- c("Method", "Coverage")
 
 ood_lambda_tbl |>
 knitr::kable(digits = 3) |> 
@@ -341,8 +352,9 @@ knitr::kable(digits = 3) |>
 ```
 
 ::: notes
--   Vanilla: 0.860 vs target 0.900 → strong undercoverage.
--   Increasing λ recovers coverage monotonically.
+- Then for actual out of distribution data, this is where the methods begin to differ.
+- We can see that vanilla coverage heavily undercovers.
+- As we increase lambda, the coverage increases as well monotonically.
 :::
 
 ------------------------------------------------------------------------
@@ -354,24 +366,9 @@ Overall coverage and singleton % on 2022 OOD points as a function of the linear 
 :::
 
 ::: notes
--   Trade-off with set composition
--   $\lambda=3$ chosen as the best choice, as it is first value to retain target coverage (0.901) while still increasing singletons and only a modest increase in two-class sets.
-:::
-
-## Nonparametric Normalization
-
-------------------------------------------------------------------------
-
-::: {#fig-empirical-calibration-comparison layout-ncol="1" fig-pos="H"}
-![](images/clipboard-2626621009.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
-
-Estimated normalization scale from 2021 calibration compared to the empirical score-variance relationship observed in 2022. The extension shows extrapolation beyond calibration support.
-:::
-
-::: notes
--   steep rise in low-variance region: nonlinearity matters.
--   The plot shows midpoint of equal sized bins, as seen there is a much higher proportion of low variance points in the ID data compared to OOD.
--   The estimated function captures the shape of the scores relatively well. Although there is some slight deviations as variance increases, the overall trend remains the same, and points to the estimated scale being conservative rather than undercovering.
+- Here we can see the differing coverage and set composition given each lambda value better.
+- there is a clear trade-off between increasing coverage and percentage of singletons
+- ideally we want to choose a value that provides a coverage of at least our target with a modest increase in two-class sets
 :::
 
 ------------------------------------------------------------------------
@@ -410,20 +407,8 @@ knitr::kable(digits = 3) |>
 ```
 
 ::: notes
--   Nonparametric performs best overall even when compared to best $\lambda$. (highest singletons and higher coverage)
-:::
-
-------------------------------------------------------------------------
-
-::: {#fig-cov-vs-var layout-ncol="1" fig-pos="H"}
-![](images/clipboard-2540638404.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
-
-Coverage on 2022 OOD points as a function of ensemble-variance bins for vanilla, linear $(\lambda = 3)$, and nonparametric normalization.
-:::
-
-::: notes
--   vanilla declines with variance -\> fails on harder points
--   nonparametric is closest to flat near target, desired behavior (conditional-ish)
+- Here are the final results
+- We can see vanilla undercovered quite a bit, linear managed to recover the lost coverage, and nonparametric performed best. It had the highest coverage as well as the highest percentage of singletons.
 :::
 
 ## Class-conditional coverage (2022)
@@ -459,75 +444,24 @@ knitr::kable(digits = 3) |>
 ```
 
 ::: notes
--   harder class is eelgrass, normalization is able to slightly help the disparity between classes. Nonparametric more so than linear.
+- Next we take a look at the class conditional coverage.
+- Main takeaway is that the harder class is eelgrass. There is a clear disparity between the coverage in both classes. Vanilla had only 78% coverage for eelgrass, which is likely due to the fact it was the minority class.
+- Variance normalization is able to slightly help the disparity between classes. Nonparametric more so than linear.
 :::
 
 ## Spatial Robustness
 
 ------------------------------------------------------------------------
 
-::::::: columns
-:::: {.column width="50%"}
 ::: {#fig-spatial}
 ![](images/clipboard-429324029.png){width="100%"}
 
 Spatial blocks (10 equal-count spatial blocks formed by Morton/Z-ordering)
 :::
-::::
 
-:::: {.column width="50%"}
-::: {#fig-zorder}
-![](images/clipboard-3322764072.png){width="100%"}
-
-Four iterations of the Z-order curve (from Wikipedia)
-:::
-::::
-:::::::
 
 ::: notes
--   partition 1,000 points into 10 spatial blocks using Morton ordering, for evaluating local stability
--   Morton (Z-order) indexing converts 2D spatial coordinates into a 1D ordering while preserving locality.
--   It works by interleaving the binary bits of x and y coordinates, producing a recursive Z-shaped traversal pattern.
-:::
-
-------------------------------------------------------------------------
-
-:::::: columns
-::: {.column width="40%"}
-```{r}
-#| label: tbl-spatial-diagnostics
-#| echo: false
-#| warning: false
-#| tbl-cap: "Spatial robustness diagnostics on 2022 OOD points."
-#| results: asis
-
-spatial_tbl <- data.frame(
-  Method               = c("Vanilla", "Linear (λ = 3.0)", "Nonparametric"),
-  BlockCoverageSD      = c(0.0494, 0.0401, 0.0357),
-  CorMeanVarCoverage_r = c(-0.622, -0.416, -0.206),
-  CorMeanVarCoverage_p = c(0.0546, 0.2314, 0.5689)
-)
-
-colnames(spatial_tbl) <- c("Method", "SD", "Correlation r", "p-value")
-
-spatial_tbl |>
-  knitr::kable(digits = 3, align = "c") |>
-  kable_styling(full_width = FALSE, font_size = 20)
-```
-:::
-
-:::: {.column width="60%"}
-::: {#fig-cov-vs-var-spatial layout-ncol="1" fig-pos="H"}
-![](images/clipboard-2465136862.png)
-
-Scatter plot of block-wise coverage vs mean variance for vanilla, linear $(\lambda=3)$, and nonparametric methods
-:::
-::::
-::::::
-
-::: notes
--   Vanilla: highest spatial variability + strongest negative variance/coverage correlation.
--   Nonparametric: best equity (lowest SD) and weakest correlation.
+-  For spatial robustness I partitioned the 1,000 points into 10 spatial blocks, which can be seen here.
 :::
 
 ------------------------------------------------------------------------
@@ -554,8 +488,9 @@ Per-block coverage for 2022 points for vanilla, linear $(\lambda=3)$, and nonpar
 :::
 
 ::: notes
--   In the above figure we can see the variance of each block. Blocks 2, 3, 5, 6, and 9 are all high variance blocks
--   Below figure shows comparison of coverage on each block. Vanilla does very poorly for all high variance blocks except 9 which seems to be an outlier. Nonparametric seems to do best.
+- In the above figure we can see the variance of each block.
+- Below figure shows comparison of coverage on each block. Vanilla does very poorly for all high variance blocks. Nonparametric seems to do best overall as most of the blocks were close to target coverage.
+- Vanilla had the highest variability between spatial blocks and largest negative correlation between coverage and variance, while nonparametric had the lowest variability and least negative correlation, resulting in the most spatial equity.
 :::
 
 ## Visual Method Comparison
@@ -602,6 +537,18 @@ For both, many of the two-set class transitions occur in the same relative area,
 
 ------------------------------------------------------------------------
 
+::: {#fig-ensemble-chip layout-ncol="1" fig-pos="H"}
+![](images/clipboard-249597789.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
+
+Example ensemble inference outputs on a 2022 chip: Raw chip (+ point), ensemble mean probability, ensemble variance, and argmax segmentation.
+:::
+
+::: notes
+Here is a representative 2022 chip with the ensemble outputs. This includes the raw chip imagery, the ensemble mean probability for the target class, the ensemble variance, and the final class segmentation. Visually, it seems that high ensemble variance aligns with boundaries between eelgrass and non-eelgrass patches as well as ambiguous pixels, such as darker shadows or where features resemble eelgrass RGB. In the example chip, it can be clearly seen that the variance spikes at the boundary between eelgrass and non-eelgrass patches. These results suggest that the disagreement signal is capturing the genuinely difficult pixels in the imagery.
+:::
+
+------------------------------------------------------------------------
+
 ::: {#fig-chip-compare layout-ncol="1" fig-pos="H"}
 ![](images/clipboard-160940226.png){style="max-height:85vh; width:auto; display:block; margin:0 auto;"}
 
@@ -609,7 +556,8 @@ Chip-level set prediction comparison on a representative 2022 point (GT = eelgra
 :::
 
 ::: notes
-This figure provides an interesting example of how variance normalization can change the predictions. At the labeled point, the ensemble mean predicts eelgrass with low confidence ($\hat p \approx 0.56$), yet the corresponding ensemble variance is also fairly low ($\hat v \approx 0.045$). This is a case where predictive uncertainty is relatively high (pixel is intrinsically ambigious, so we have high entropy/low confidence) but epistemic uncertainty is low (the ensemble members agree, resulting in low variance). As a result, both vanilla CP and linear variance-normalized method produce an empty set prediction at the labeled point. In contrast, the nonparametric method, retains eelgrass as the correct singleton set prediction.
+- both vanilla CP and linear variance-normalized method produce an empty set prediction at the labeled point. 
+- nonparametric method, retains eelgrass as the correct singleton set prediction.
 
 We can see these results even more clearly in the entire segmented chip, vanilla CP results in a large portion of empty sets in areas of ambiguity (borders between eelgrass and other as well as darker shadows). The linear method is able to shrink these ambiguous areas to singletons and two-set classes (as seen by the thinner strips between other and eelgrass) but still has a large portion of empty set predictions. Nonparametric is able to further shrink the area of ambiguity, while also producing almost no empty sets, instead providing more informative 2 class sets.
 :::
@@ -680,7 +628,7 @@ tab
 
 ::: notes
 -   Main trend persists across all alpha levels, vanilla undercovers, normalization recovers the lost coverage to at or near target levels.
--   At very low $\alpha$ tradeoffs are more pronounce, as we see a laerge increase in two-class sets, intuitively makes sense if we are trying to ensure such high confidence.
+-   At very low $\alpha$ tradeoffs are more pronounce, as we see a large increase in two-class sets, intuitively makes sense if we are trying to ensure such high confidence.
 -   Continue to graphs for a more intuitive visual comparison
 :::
 
@@ -795,11 +743,10 @@ gg_setcomp
 
 ## Takeaways
 
-1.  Ensemble improves accuracy and provides useful uncertainty
-2.  ID: all conformal methods meet target coverage
-3.  OOD (2022): vanilla CP undercovers, ensemble variance normalization recovers lost coverage
-4.  Improved coverage vs variance and improved spatial equity
-5.  Nonparametric seemed to work best and requires no parameter tuning.
+1.  ID: all conformal methods meet target coverage
+2.  OOD (2022): vanilla CP undercovers, ensemble variance normalization recovers lost coverage
+3.  Variance-normalization improved coverage vs variance and improved spatial equity
+4.  Nonparametric seemed to work best and requires no parameter tuning.
 
 ## Limitations
 
