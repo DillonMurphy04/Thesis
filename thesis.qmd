@@ -84,25 +84,33 @@ The full split conformal procedure is summarized in Algorithm \ref{alg-split-cp}
 \label{alg-split-cp}
 \textbf{Input:} Training data $(X_{train},Y_{train})$, calibration data $(X_{cal},Y_{cal})$, miscoverage level $\alpha$ \\[4pt]
 \textbf{Output:} Prediction set $C_\alpha(x)$ for each test point $x$
+
 \begin{enumerate}
 \item Train classifier $f$ on $(X_{train},Y_{train})$.
+
 \item For each calibration point $(x_i,y_i)$:
 \begin{enumerate}
-\item Compute predicted probabilities $\hat p_i = f(x_i)$.
-\item Compute nonconformity score $s_i = 1 - \hat p_i(y_i)$.
+\item Compute predicted probabilities $\hat p(x_i)=f(x_i)$.
+\item Compute nonconformity score
+\[
+s_i = 1 - \hat p_{y_i}(x_i).
+\]
 \end{enumerate}
+
 \item Compute the finite-sample corrected quantile
 \[
 \hat q_\alpha = \operatorname{Quantile}_{\lceil (n+1)(1-\alpha)\rceil/n}(s_1,\dots,s_n).
 \]
+
 \item For a new input $x$:
 \begin{enumerate}
-\item Compute probabilities $\hat p = f(x)$.
+\item Compute probabilities $\hat p(x)=f(x)$.
 \item Return prediction set
 \[
-C_\alpha(x) = \{y : 1 - \hat p(y) \le \hat q_\alpha\}.
+C_\alpha(x) = \{y : 1 - \hat p_y(x) \le \hat q_\alpha\}.
 \]
 \end{enumerate}
+
 \end{enumerate}
 \end{algorithm}
 ```
