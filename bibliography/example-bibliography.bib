@@ -131,3 +131,20 @@ booktitle = {Proceedings of the 33rd International Conference on Neural Informat
 articleno = {227},
 numpages = {11}
 }
+
+
+@InProceedings{podkopaev2021,
+  title = 	 {Distribution-free uncertainty quantification for classification under label shift},
+  author =       {Podkopaev, Aleksandr and Ramdas, Aaditya},
+  booktitle = 	 {Proceedings of the Thirty-Seventh Conference on Uncertainty in Artificial Intelligence},
+  pages = 	 {844--853},
+  year = 	 {2021},
+  editor = 	 {de Campos, Cassio and Maathuis, Marloes H.},
+  volume = 	 {161},
+  series = 	 {Proceedings of Machine Learning Research},
+  month = 	 {27--30 Jul},
+  publisher =    {PMLR},
+  pdf = 	 {https://proceedings.mlr.press/v161/podkopaev21a/podkopaev21a.pdf},
+  url = 	 {https://proceedings.mlr.press/v161/podkopaev21a.html},
+  abstract = 	 {Trustworthy deployment of ML models requires a proper measure of uncertainty, especially in safety-critical applications. We focus on uncertainty quantification (UQ) for classification problems via two avenues — prediction sets using conformal prediction and calibration of probabilistic predictors by post-hoc binning — since these possess distribution-free guarantees for i.i.d. data. Two common ways of generalizing beyond the i.i.d. setting include handling <em>covariate</em> and <em>label</em> shift. Within the context of distribution-free UQ, the former has already received attention, but not the latter. It is known that label shift hurts prediction, and we first argue that it also hurts UQ, by showing degradation in coverage and calibration. Piggybacking on recent progress in addressing label shift (for better prediction), we examine the right way to achieve UQ by reweighting the aforementioned conformal and calibration procedures whenever some unlabeled data from the target distribution is available. We examine these techniques theoretically in a distribution-free framework and demonstrate their excellent practical performance.}
+}
