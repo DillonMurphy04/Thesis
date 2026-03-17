@@ -5,6 +5,7 @@ execute:
 format:
   pdf:
     documentclass: report
+    classoption: openany
     papersize: letter
     fontsize: 12pt
     mainfont: Times New Roman
@@ -40,7 +41,7 @@ library(kableExtra)
 ablation_summary <- read_csv("data/ablation_summary.csv")
 ```
 
-# Introduction
+# INTRODUCTION
 
 Eelgrass (*Zostera marina*) is a seagrass species of temperate waters that provides an anchor to coastal ecosystems by providing sediment stabilization, carbon sequestration, habitats for protected species, and eliminating contamination. Warming oceans, storm regimes, and local disturbance have quickly reshaped the intertidal morphology and habitat extent. As these threats increase, there is a need to monitor changes to determine appropriate environmental management. In recent years, deep networks have made this intertidal mapping practical for complex imagery, achieving strong pixel-wise accuracy in areas such as Morro Bay, California [@tallam2023]. However, the reliability of general utilization of these classification models not only relies on high-accuracy segmentation, but also on rigorous uncertainty quantification under temporal and spatial distribution shift. Imagery collected over different years, at different tides or seasons, can erode the model's calibration, causing it to be over-confident. This study builds off existing models to create a post-hoc uncertainty framework that is robust to distributional shift.
 
@@ -60,7 +61,7 @@ This thesis develops a rescaling design for eelgrass segmentation of multi-year 
 
 The impact of these designs is evaluated in Chapter 4 (Results), demonstrating improved robustness to drift while retaining the standard CP workflow. Importantly, neither approach requires labels at test time or retraining.
 
-# Background and Motivation
+# BACKGROUND AND MOTIVATION
 
 Effective eelgrass monitoring requires models that both provide accurate predictions, as well as how certain they are for those predictions. This section reviews the uncertainty concepts used in deep learning.
 
@@ -145,7 +146,7 @@ S = a(V)U, \quad a(V)>0,\quad U \perp\!\!\!\perp V
 \label{eq:difficulty-model}
 \end{equation} where U represents a difficulty invariant component of the nonconformity score, assumed to be independent of V. Then, $S'=S/a(V)\approx U$, so $S'|V$ becomes approximately invariant, and locally tuned to difficulty. Normalization targets the actual failure under shift, so that the global threshold will become too lenient for the hard OOD inputs. On the calibration set, we estimate $\hat{a} \approx E[S|V=v]$ via quantile binning and smooth interpolation, and then conformalize the normalized score $S'=S/\hat{a}(V)$. Thus, if the conditional distribution $S|V=v$ is roughly the same across years: $$S∣V=v (calibration)\approx S∣V=v (test),$$ then we expect the normalized scores to be approximately stable conditional on $V$. Then the global quantile will be appropriate across the shifted years. Intuitively, pixels with large member disagreements (difficult pixels) would have larger scores. Dividing by $\hat{a}(V)$ will equalize the scores, so that difficult and easy pixels are all scored equally, being precise on easy inputs and conservative on difficult ones. By using a difficulty signal (epistemic uncertainty) that is specifically “shift-aware,” we expect that the score becomes shift-aware as well.
 
-# Methodology
+# METHODOLOGY
 
 ## Data
 
@@ -263,10 +264,10 @@ Beyond the main evaluation metrics, we added a few complementary metrics to eval
 ::: {#fig-spatial}
 ![](images/clipboard-429324029.png)
 
-Spatial blocks (10 equal-count spatial blocks formed by Morton ordering)
+Spatial blocks (10 equal-count spatial blocks formed by Morton ordering).
 :::
 
-# Results
+# RESULTS
 
 ## Ensemble Results
 
@@ -759,7 +760,7 @@ gg_setcomp <- ggplot(
 gg_setcomp
 ```
 
-# Conclusion
+# CONCLUSION
 
 This study developed and evaluated a practical uncertainty pipeline for time-series eelgrass segmentation that is reliable under temporal distribution shift. We were motivated by the reality that ecological modeling is deployed across years with differing image conditions and requires useful uncertainty estimates for truly reliable models. Building off existing strong deep segmentation models, we combined heterogeneous deep ensembles, probability calibration, and conformal prediction to produce classification sets at a user-defined confidence level. While standard conformal prediction provides finite-sample marginal coverage under exchangeability, realistic year-over-year imagery often violates this assumption, causing conformal prediction to under-cover on temporally shifted data and resulting in a larger concentration of errors in the most difficult regions, precisely where uncertainty estimates would be most useful.
 

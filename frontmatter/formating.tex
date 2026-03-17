@@ -19,11 +19,11 @@
 \renewcommand{\cftlottitlefont}{\normalsize\MakeUppercase\hfill LIST OF TABLES \hfill}
 \renewcommand{\cftloftitlefont}{\normalsize\MakeUppercase\hfill LIST OF FIGURES \hfill}
 
-\setlength{\cftbeforetoctitleskip}{0pt}
+\setlength{\cftbeforetoctitleskip}{-30pt}
 \setlength{\cftaftertoctitleskip}{10pt}
-\setlength{\cftbeforelottitleskip}{0pt}
+\setlength{\cftbeforelottitleskip}{-30pt}
 \setlength{\cftafterlottitleskip}{10pt}
-\setlength{\cftbeforeloftitleskip}{0pt}
+\setlength{\cftbeforeloftitleskip}{-30pt}
 \setlength{\cftafterloftitleskip}{10pt}
 
 % --- Main Matter Control ---
@@ -49,22 +49,32 @@
 }
 
 % --- Chapter/Section Formatting ---
-\titleformat{\chapter}[display]
-  {\normalfont\centering}
-  {\chaptertitlename\ \thechapter}
-  {0pt}
-  {\MakeUppercase}
 \titleformat*{\section}{\normalfont\bfseries}
 \titleformat*{\subsection}{\normalfont\bfseries}
 \titleformat*{\subsubsection}{\normalfont\bfseries}
-\titlespacing{\chapter}{0pt}{0pt}{20pt} % {left}{beforesep}{aftersep}
 
 % --- Line Spacing ---
 \doublespacing
 
 % --- Chapter Page Style ---
 \makeatletter
-\patchcmd{\chapter}{\thispagestyle{plain}}{\thispagestyle{plain}}{}{}
+\def\@makechapterhead#1{%
+  {\parindent \z@ \centering \normalfont
+    \interlinepenalty\@M
+    \ifnum \c@secnumdepth >\m@ne
+      \normalsize \MakeUppercase{\@chapapp\ \thechapter}
+      \par\nobreak
+      \vskip 0pt
+    \fi
+    \normalsize \MakeUppercase{#1}\par\nobreak
+    \vskip 20pt
+  }}
+\def\@makeschapterhead#1{%
+  {\parindent \z@ \centering \normalfont
+    \interlinepenalty\@M
+    \normalsize \MakeUppercase{#1}\par\nobreak
+    \vskip 20pt
+  }}
 \makeatother
 
 % --- Custom TOC Formatting for Appendix ---
